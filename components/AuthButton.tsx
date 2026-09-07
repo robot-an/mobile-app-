@@ -49,13 +49,13 @@ export default function AuthButton() {
 
   if (loading) {
     return (
-      <div className="h-9 w-28 bg-beige-200/60 rounded-2xl animate-pulse"></div>
+      <div className="h-9 w-28 bg-orange-100/60 rounded-2xl animate-pulse"></div>
     );
   }
 
   if (user) {
     return (
-      <div className="flex items-center space-x-2.5 bg-beige-50 border border-beige-300 px-3 py-1.5 rounded-2xl shadow-sm">
+      <div className="flex items-center space-x-2.5 bg-orange-50 border border-orange-200 px-3 py-1.5 rounded-2xl shadow-sm">
         <UserAvatar user={user} size="sm" />
         <div className="hidden md:block text-left">
           <p className="text-xs font-bold text-navy-900 leading-tight">
@@ -68,7 +68,7 @@ export default function AuthButton() {
         <button
           onClick={handleSignOut}
           title="Đăng xuất"
-          className="p-1.5 hover:bg-beige-200 rounded-xl text-gray-500 hover:text-red-600 transition-colors"
+          className="p-1.5 hover:bg-orange-100 rounded-xl text-gray-500 hover:text-red-600 transition-colors"
         >
           <LogOut className="w-4 h-4" />
         </button>
@@ -79,7 +79,7 @@ export default function AuthButton() {
   return (
     <button
       onClick={handleGoogleSignIn}
-      className="inline-flex items-center space-x-2 px-3.5 py-2 rounded-2xl bg-white hover:bg-beige-50 border-2 border-beige-300 text-navy-900 font-bold text-xs shadow-sm transition-all hover:border-medical-blue active:scale-95"
+      className="inline-flex items-center space-x-2 px-3.5 py-2 rounded-2xl bg-white hover:bg-orange-50 border-2 border-slate-200 text-navy-900 font-bold text-xs shadow-sm transition-all hover:border-medical-blue active:scale-95"
     >
       <svg className="w-4 h-4" viewBox="0 0 24 24">
         <path

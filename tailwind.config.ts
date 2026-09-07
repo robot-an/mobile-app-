@@ -22,16 +22,29 @@ const config: Config = {
           800: "#1E293B",
           900: "#0F172A",
         },
+        // Bảng màu thương hiệu "An" — theo logo mới (kim la bàn cam, vòng xanh lá, ghim định vị xanh navy)
+        blue: {
+          50: "#EEF3F7",
+          100: "#DCE7F0",
+          200: "#B9D0E3",
+          300: "#8FB1CC",
+          400: "#4F83A8",
+          500: "#326688",
+          600: "#245471",
+          700: "#173A56",
+          800: "#122C42",
+          900: "#0E2438",
+        },
         medical: {
-          blue: "#2563EB",   // Primary medical action blue
-          hover: "#1D4ED8",
-          light: "#EFF6FF",  // Subtle card highlight
-          accent: "#0284C7", // Cyan-blue accent
+          blue: "#173A56",   // Ghim định vị navy — màu hành động chính
+          hover: "#0E2438",
+          light: "#EEF3F7",  // Subtle card highlight
+          accent: "#245471", // Navy accent
         },
         navy: {
           800: "#1E293B",
           900: "#0F172A",
-          700: "#2563EB",
+          700: "#173A56",
         },
         emergency: {
           DEFAULT: "#EF4444",
