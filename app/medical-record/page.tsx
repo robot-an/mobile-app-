@@ -37,82 +37,34 @@ export default function MobileMedicalRecordPage() {
   const [formData, setFormData] = useState<MedicalRecord>({
     robot_id: robotId,
     patient_id: "patient_01",
-    medical_code: "220826-560007302212",
-    insurance_code: "DN4010123456789",
+    medical_code: "",
+    insurance_code: "",
     target_type: "elderly",
-    full_name: "NGUYỄN HOÀNG HIỆP",
-    age: 29,
+    full_name: "",
+    age: 0,
     gender: "male",
     blood_type: "A+",
-    medical_history: "Rối loạn lipid máu hỗn hợp (Cholesterol toàn phần 8.16 mmol/L, LDL-C 6.33 mmol/L). Block nhánh phải hoàn toàn (RBBB) trên điện tâm đồ. Thoái hóa cột sống cổ. Tiền sử viêm loét dạ dày, tiền sử phẫu thuật cắt trĩ. Tật khúc xạ mắt hai bên. Vi đạm niệu nhẹ (Microalbumin niệu 3 mg/dL).",
-    chronic_conditions: [
-      "Tăng cholesterol máu nguyên phát / Rối loạn lipid máu (ICD-10: E78.0)",
-      "Block nhánh phải hoàn toàn (ICD-10: I45.1)",
-      "Thoái hóa cột sống cổ (ICD-10: M47.8)",
-      "Viêm loét dạ dày tá tràng (ICD-10: K27)",
-      "Vi đạm niệu nhẹ / Microalbumin niệu (3 mg/dL)"
-    ],
-    allergies: "Dị ứng hành lá (mẩn ngứa da liễu cấp), mẫn cảm thức ăn chua cay kích ứng dạ dày",
-    medication_schedule: "Atorvastatin 20mg (20:00 tối sau ăn), Esomeprazole 20mg (07:00 sáng trước ăn khi đau dạ dày)",
-    medications_list: [
-      {
-        id: "med_01",
-        name: "Atorvastatin (Lipitor)",
-        dosage: "20mg",
-        times: ["20:00"],
-        instructions: "Uống 1 viên vào buổi tối sau ăn với nước lọc",
-        purpose: "Hạ mỡ máu, giảm Cholesterol toàn phần và LDL-C",
-        remaining_pills: 30,
-        doctor_prescribed: "BS. PKĐK MEDLATEC"
-      },
-      {
-        id: "med_02",
-        name: "Esomeprazole (Nexium)",
-        dosage: "20mg",
-        times: ["07:00"],
-        instructions: "Uống 1 viên vào buổi sáng trước ăn 30 phút khi đau tức dạ dày",
-        purpose: "Giảm tiết axit dạ dày, phòng ngừa viêm loét tái phát",
-        remaining_pills: 14,
-        doctor_prescribed: "BS. PKĐK MEDLATEC"
-      },
-      {
-        id: "med_03",
-        name: "Glucosamine & Canxi Nano",
-        dosage: "500mg",
-        times: ["12:00"],
-        instructions: "Uống 1 viên vào buổi trưa sau ăn no",
-        purpose: "Bổ sung dưỡng chất sụn khớp, hỗ trợ thoái hóa cột sống cổ",
-        remaining_pills: 60,
-        doctor_prescribed: "BS. PKĐK MEDLATEC"
-      }
-    ],
-    contraindications: [
-      "Tuyệt đối kiêng thực phẩm chứa hành lá (tiền sử dị ứng mẩn ngứa da liễu cấp).",
-      "Hạn chế tối đa mỡ động vật, nội tạng, đồ chiên rán, lòng đỏ trứng để kiểm soát mỡ máu LDL-C (6.33 mmol/L).",
-      "Tránh sử dụng thuốc giảm đau kháng viêm NSAIDs (Ibuprofen, Diclofenac) do tiền sử viêm loét dạ dày.",
-      "Tránh ngồi cúi gập cổ trong thời gian dài (bảo vệ cột sống cổ, tập vận động cổ sau mỗi 45 phút).",
-      "Tránh vận động quá sức đột ngột khi chưa khởi động kỹ (theo dõi nhịp tim Block nhánh phải)."
-    ],
+    medical_history: "",
+    chronic_conditions: [],
+    allergies: "",
+    medication_schedule: "",
+    medications_list: [],
+    contraindications: [],
     baseline_biometrics: {
       blood_pressure_systolic: 120,
-      blood_pressure_diastolic: 70,
-      heart_rate_bpm: 82,
-      spo2_percent: 99,
-      temperature_c: 36.6,
-      blood_glucose_mmol: 4.34,
-      cholesterol_total: 8.16,
-      cholesterol_ldl: 6.33,
-      weight_kg: 69,
-      height_cm: 161
+      blood_pressure_diastolic: 80,
+      heart_rate_bpm: 75,
+      spo2_percent: 98,
+      temperature_c: 36.6
     },
     primary_doctor: {
-      name: "Bác sĩ PKĐK MEDLATEC",
-      hospital: "Phòng khám Đa khoa MEDLATEC Số 1 - Tây Hồ, Hà Nội",
-      phone: "1900565656",
-      specialty: "Nội tổng quát & Tim mạch"
+      name: "",
+      hospital: "",
+      phone: "",
+      specialty: ""
     },
-    emergency_contact: "0846.888.196 (Người thân khẩn cấp)",
-    notes: "Mã hồ sơ xét nghiệm MEDLATEC: 220826-560007302212. Nhắc anh Hiệp kiêng ăn hành lá, hạn chế dầu mỡ và tập duỗi cổ định kỳ."
+    emergency_contact: "",
+    notes: ""
   });
 
   const [chronicInput, setChronicInput] = useState("");
@@ -232,9 +184,9 @@ export default function MobileMedicalRecordPage() {
     }));
   };
 
-  const weight = formData.baseline_biometrics?.weight_kg || 69;
-  const heightM = (formData.baseline_biometrics?.height_cm || 161) / 100;
-  const bmi = heightM > 0 ? (weight / (heightM * heightM)).toFixed(1) : "26.6";
+  const weight = formData.baseline_biometrics?.weight_kg || 0;
+  const heightM = (formData.baseline_biometrics?.height_cm || 0) / 100;
+  const bmi = weight > 0 && heightM > 0 ? (weight / (heightM * heightM)).toFixed(1) : "—";
 
   const saveRecord = async () => {
     setSaving(true);
@@ -424,7 +376,7 @@ export default function MobileMedicalRecordPage() {
                   name="full_name"
                   value={formData.full_name}
                   onChange={handleChange}
-                  placeholder="NGUYỄN HOÀNG HIỆP"
+                  placeholder="VD: Nguyễn Văn A"
                   required
                   className="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 bg-slate-50 focus:border-medical-blue focus:ring-0"
                 />
@@ -637,16 +589,15 @@ export default function MobileMedicalRecordPage() {
 
             <div className="grid grid-cols-2 gap-2.5 pt-1 border-t border-slate-100">
               <div className="p-2.5 bg-slate-50 rounded-xl space-y-1">
-                <label className="block text-[9px] font-bold uppercase text-slate-500 flex items-center justify-between">
-                  <span>Đường Huyết Đói</span>
-                  <span className="text-[9px] text-emerald-600 font-bold">Chuẩn</span>
+                <label className="block text-[9px] font-bold uppercase text-slate-500">
+                  Đường Huyết Đói
                 </label>
                 <div className="flex items-center gap-1">
                   <input
                     type="number"
                     step="0.01"
-                    value={formData.baseline_biometrics?.blood_glucose_mmol || 4.34}
-                    onChange={(e) => handleBiometricChange("blood_glucose_mmol", parseFloat(e.target.value) || 4.34)}
+                    value={formData.baseline_biometrics?.blood_glucose_mmol || ""}
+                    onChange={(e) => handleBiometricChange("blood_glucose_mmol", parseFloat(e.target.value) || 0)}
                     className="w-full px-2 py-1.5 rounded-lg border border-slate-300 font-bold text-xs text-slate-900 bg-white"
                   />
                   <span className="text-[9px] text-slate-500 font-medium">mmol/L</span>
@@ -669,35 +620,33 @@ export default function MobileMedicalRecordPage() {
                 </div>
               </div>
 
-              <div className="p-2.5 bg-amber-50/60 rounded-xl border border-amber-200 space-y-1">
-                <label className="block text-[9px] font-bold uppercase text-amber-800 flex items-center justify-between">
-                  <span>Cholesterol TP</span>
-                  <span className="text-[9px] text-red-600 font-black">Tăng</span>
+              <div className="p-2.5 bg-slate-50 rounded-xl space-y-1">
+                <label className="block text-[9px] font-bold uppercase text-slate-500">
+                  Cholesterol TP
                 </label>
                 <div className="flex items-center gap-1">
                   <input
                     type="number"
                     step="0.01"
-                    value={formData.baseline_biometrics?.cholesterol_total || 8.16}
-                    onChange={(e) => handleBiometricChange("cholesterol_total", parseFloat(e.target.value) || 8.16)}
-                    className="w-full px-2 py-1.5 rounded-lg border border-amber-300 font-bold text-xs text-red-600 bg-white"
+                    value={formData.baseline_biometrics?.cholesterol_total || ""}
+                    onChange={(e) => handleBiometricChange("cholesterol_total", parseFloat(e.target.value) || 0)}
+                    className="w-full px-2 py-1.5 rounded-lg border border-slate-300 font-bold text-xs text-slate-900 bg-white"
                   />
                   <span className="text-[9px] text-slate-500 font-medium">mmol/L</span>
                 </div>
               </div>
 
-              <div className="p-2.5 bg-amber-50/60 rounded-xl border border-amber-200 space-y-1">
-                <label className="block text-[9px] font-bold uppercase text-amber-800 flex items-center justify-between">
-                  <span>Mỡ Xấu LDL-C</span>
-                  <span className="text-[9px] text-red-600 font-black">Cao</span>
+              <div className="p-2.5 bg-slate-50 rounded-xl space-y-1">
+                <label className="block text-[9px] font-bold uppercase text-slate-500">
+                  Mỡ Xấu LDL-C
                 </label>
                 <div className="flex items-center gap-1">
                   <input
                     type="number"
                     step="0.01"
-                    value={formData.baseline_biometrics?.cholesterol_ldl || 6.33}
-                    onChange={(e) => handleBiometricChange("cholesterol_ldl", parseFloat(e.target.value) || 6.33)}
-                    className="w-full px-2 py-1.5 rounded-lg border border-amber-300 font-bold text-xs text-red-600 bg-white"
+                    value={formData.baseline_biometrics?.cholesterol_ldl || ""}
+                    onChange={(e) => handleBiometricChange("cholesterol_ldl", parseFloat(e.target.value) || 0)}
+                    className="w-full px-2 py-1.5 rounded-lg border border-slate-300 font-bold text-xs text-slate-900 bg-white"
                   />
                   <span className="text-[9px] text-slate-500 font-medium">mmol/L</span>
                 </div>
@@ -710,8 +659,8 @@ export default function MobileMedicalRecordPage() {
                 <div className="flex items-center gap-1">
                   <input
                     type="number"
-                    value={formData.baseline_biometrics?.weight_kg || 69}
-                    onChange={(e) => handleBiometricChange("weight_kg", parseFloat(e.target.value) || 69)}
+                    value={formData.baseline_biometrics?.weight_kg || ""}
+                    onChange={(e) => handleBiometricChange("weight_kg", parseFloat(e.target.value) || 0)}
                     className="w-full px-2 py-2 rounded-xl border border-slate-300 font-bold text-xs bg-slate-50"
                   />
                   <span className="text-[10px] text-slate-500">kg</span>
@@ -723,8 +672,8 @@ export default function MobileMedicalRecordPage() {
                 <div className="flex items-center gap-1">
                   <input
                     type="number"
-                    value={formData.baseline_biometrics?.height_cm || 161}
-                    onChange={(e) => handleBiometricChange("height_cm", parseInt(e.target.value) || 161)}
+                    value={formData.baseline_biometrics?.height_cm || ""}
+                    onChange={(e) => handleBiometricChange("height_cm", parseInt(e.target.value) || 0)}
                     className="w-full px-2 py-2 rounded-xl border border-slate-300 font-bold text-xs bg-slate-50"
                   />
                   <span className="text-[10px] text-slate-500">cm</span>

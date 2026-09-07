@@ -156,14 +156,16 @@ export default function MobileDashboard() {
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
                 <h3 className="text-xs font-bold text-slate-900 truncate">
-                  {patientRecord?.full_name || "NGUYỄN HOÀNG HIỆP"}
+                  {patientRecord?.full_name || "Chưa cập nhật"}
                 </h3>
-                <span className="text-[9px] px-1.5 py-0.2 rounded bg-blue-50 text-medical-blue font-bold flex-shrink-0">
-                  {patientRecord?.age || 29} tuổi
-                </span>
+                {patientRecord?.age ? (
+                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-blue-50 text-medical-blue font-bold flex-shrink-0">
+                    {patientRecord.age} tuổi
+                  </span>
+                ) : null}
               </div>
               <p className="text-[10px] text-slate-500 font-medium truncate">
-                Nhóm máu: <span className="font-bold text-slate-700">{patientRecord?.blood_type || "A+"}</span> • Mỡ máu & Cột sống cổ
+                Nhóm máu: <span className="font-bold text-slate-700">{patientRecord?.blood_type || "—"}</span>
               </p>
             </div>
           </div>

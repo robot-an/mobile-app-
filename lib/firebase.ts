@@ -148,6 +148,11 @@ export interface MedicalRecord {
   notes?: string;
   ai_personality_preference?: string; // "Trợ lý y tế ân cần, nhắc lịch cữ thuốc đúng giờ"
   updated_at?: string;
+
+  // Trạng thái thiết lập ban đầu (Onboarding)
+  setup_completed?: boolean;   // true sau khi người giám hộ hoàn tất luồng setup lần đầu
+  owner_uid?: string;          // UID Firebase của người giám hộ đã hoàn tất setup
+  created_at?: string;
 }
 
 // 4. Cơ Sở Tri Thức RAG & Vector Embeddings (RAG Knowledge Base)

@@ -10,7 +10,7 @@ interface LoadingScreenProps {
 }
 
 const LOADING_STEPS = [
-  "Chú Kiến Y Tế An đang thắp sáng 2 râu anten...",
+  "Đang khởi động Robot An...",
   "Đang kết nối hệ thống vi điều khiển ESP32...",
   "Đang nạp Sổ Y Bạ & Chỉ số sinh hiệu nền...",
   "Kích hoạt RAG Vector Knowledge Base (text-embedding-004)...",
@@ -19,7 +19,7 @@ const LOADING_STEPS = [
 
 export default function LoadingScreen({
   message = "Đang tải hệ thống Robot An...",
-  subMessage = "Chú Kiến Y Tế Chăm Chỉ • Giám Hộ Kép"
+  subMessage = "Giám Hộ Kép AI • Bảo Vệ Thông Minh"
 }: LoadingScreenProps) {
   const [stepIndex, setStepIndex] = useState(0);
 
@@ -31,16 +31,16 @@ export default function LoadingScreen({
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-beige-100/95 backdrop-blur-md p-6">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-orange-50/95 backdrop-blur-md p-6">
       {/* Vòng sáng nền mờ ấm áp */}
-      <div className="absolute w-80 h-80 rounded-full bg-amber-400/15 blur-3xl -z-10 animate-pulse" />
+      <div className="absolute w-80 h-80 rounded-full bg-orange-400/15 blur-3xl -z-10 animate-pulse" />
 
-      {/* Logo 3D Chú Kiến An với hiệu ứng hào quang xoay */}
+      {/* Logo An với hiệu ứng hào quang xoay */}
       <div className="mb-6 relative">
         <AppLogo size="xl" isLoading={true} />
-        
-        {/* Bóng đèn anten phát sáng lấp lánh */}
-        <div className="absolute -top-1 -right-1 p-1.5 bg-amber-500 text-white rounded-full shadow-lg animate-bounce">
+
+        {/* Bóng đèn phát sáng lấp lánh */}
+        <div className="absolute -top-1 -right-1 p-1.5 bg-orange-500 text-white rounded-full shadow-lg animate-bounce">
           <Lightbulb className="w-3.5 h-3.5" />
         </div>
       </div>
@@ -54,9 +54,8 @@ export default function LoadingScreen({
           <span className="px-2 py-0.5 rounded-lg bg-medical-blue text-white text-xs font-black shadow-sm">
             AN
           </span>
-          <span className="text-sm">🐜</span>
         </div>
-        <p className="text-xs text-amber-800 font-bold uppercase tracking-wider">
+        <p className="text-xs text-orange-700 font-bold uppercase tracking-wider">
           {subMessage}
         </p>
       </div>
@@ -83,12 +82,12 @@ export default function LoadingScreen({
       </div>
 
       {/* Dòng trạng thái chuyển nhịp nhàng */}
-      <div className="mt-4 p-3.5 rounded-2xl bg-white/90 border-2 border-amber-200 shadow-sm max-w-xs w-full text-center">
+      <div className="mt-4 p-3.5 rounded-2xl bg-white/90 border-2 border-orange-200 shadow-sm max-w-xs w-full text-center">
         <p className="text-xs font-bold text-navy-900 transition-all duration-500 animate-fadeIn">
           {LOADING_STEPS[stepIndex]}
         </p>
-        <div className="w-full bg-beige-200 h-1.5 rounded-full mt-2.5 overflow-hidden">
-          <div className="bg-gradient-to-r from-amber-500 via-medical-blue to-orange-500 h-full rounded-full animate-[progress_1.8s_ease-in-out_infinite]" />
+        <div className="w-full bg-slate-200 h-1.5 rounded-full mt-2.5 overflow-hidden">
+          <div className="bg-gradient-to-r from-orange-500 via-emerald-400 to-blue-600 h-full rounded-full animate-[progress_1.8s_ease-in-out_infinite]" />
         </div>
       </div>
     </div>

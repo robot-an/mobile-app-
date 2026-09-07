@@ -3,6 +3,7 @@ import "./globals.css";
 import MobileHeader from "@/components/MobileHeader";
 import BottomNav from "@/components/BottomNav";
 import ReminderAlarm from "@/components/ReminderAlarm";
+import AuthGate from "@/components/AuthGate";
 import { HeaderActionProvider } from "@/lib/header-action-context";
 
 export const metadata: Metadata = {
@@ -15,8 +16,8 @@ export const metadata: Metadata = {
     title: "Robot An",
   },
   icons: {
-    icon: "/logo.jpg",
-    apple: "/logo.jpg",
+    icon: "/logo-an-mark.svg",
+    apple: "/logo-an-mark.svg",
   }
 };
 
@@ -26,7 +27,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#2563EB",
+  themeColor: "#173A56",
 };
 
 export default function RootLayout({
@@ -44,21 +45,24 @@ export default function RootLayout({
       <body className="bg-slate-950 h-full flex justify-center text-slate-900 antialiased selection:bg-medical-blue selection:text-white overflow-hidden select-none">
         {/* Khung App Điện Thoại Di Động Cố Định (Fixed 100dvh Viewport) */}
         <div className="w-full max-w-md h-[100dvh] max-h-[100dvh] bg-slate-50 shadow-2xl relative flex flex-col border-x border-slate-200 overflow-hidden">
-          <HeaderActionProvider>
-            {/* Header Cố Định Ở Đầu */}
-            <MobileHeader />
+          {/* Chặn toàn bộ nội dung phía sau đăng nhập + thiết lập Sổ Y Bạ lần đầu */}
+          <AuthGate>
+            <HeaderActionProvider>
+              {/* Header Cố Định Ở Đầu */}
+              <MobileHeader />
 
-            {/* Container Nội Dung Chính Không Bị Cuộn Khung Ngoại */}
-            <main className="flex-1 overflow-hidden relative flex flex-col">
-              {children}
-            </main>
-          </HeaderActionProvider>
+              {/* Container Nội Dung Chính Không Bị Cuộn Khung Ngoại */}
+              <main className="flex-1 overflow-hidden relative flex flex-col">
+                {children}
+              </main>
+            </HeaderActionProvider>
 
-          {/* Thanh Điều Hướng Đáy Cố Định */}
-          <BottomNav />
+            {/* Thanh Điều Hướng Đáy Cố Định */}
+            <BottomNav />
 
-          {/* Báo thức nhắc thuốc - chạy nền toàn app, không phụ thuộc trang đang mở */}
-          <ReminderAlarm />
+            {/* Báo thức nhắc thuốc - chạy nền toàn app, không phụ thuộc trang đang mở */}
+            <ReminderAlarm />
+          </AuthGate>
         </div>
       </body>
     </html>
