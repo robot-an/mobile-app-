@@ -249,7 +249,7 @@ export default function MobileMedicalRecordPage() {
 
       await setDoc(doc(db, "medical_records", robotId), payload, { merge: true });
 
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://robot-an-backend.onrender.com";
       await fetch(`${backendUrl}/api/medical-records?robot_id=${robotId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

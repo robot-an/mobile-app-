@@ -42,7 +42,7 @@ export default function MobileAlertsPage() {
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://robot-an-backend.onrender.com";
         const res = await fetch(`${backendUrl}/api/logs?robot_id=${robotId}`);
         const data = await res.json();
         if (data.success && data.data) {
@@ -59,7 +59,7 @@ export default function MobileAlertsPage() {
   const handleResetSOS = async () => {
     setResetting(true);
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://robot-an-backend.onrender.com";
       await fetch(`${backendUrl}/api/reset-sos?robot_id=${robotId}`, { method: "POST" });
     } catch (err) {} finally {
       setResetting(false);
