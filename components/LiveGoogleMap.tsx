@@ -110,7 +110,7 @@ export default function LiveGoogleMap({
       }, { merge: true });
 
       // 2. Gửi đến backend REST API
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://robot-an-backend.onrender.com";
       await fetch(`${backendUrl}/api/location`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

@@ -100,7 +100,7 @@ export default function MobileDashboard() {
   const handleResetSOS = async () => {
     setStatus((prev) => ({ ...prev, fall_detected: false, sos_alert: false }));
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://robot-an-backend.onrender.com";
       await fetch(`${backendUrl}/api/reset-sos?robot_id=${robotId}`, { method: "POST" });
     } catch (err) {}
   };

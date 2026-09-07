@@ -354,7 +354,7 @@ export default function MobileChatPage() {
         }, { merge: true });
       } catch (e) {}
 
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://robot-an-backend.onrender.com";
       const res = await fetch(`${backendUrl}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -463,7 +463,7 @@ export default function MobileChatPage() {
           >
             {msg.sender === "bot" && (
               <div className="w-7 h-7 rounded-lg overflow-hidden shadow-xs flex-shrink-0 mb-1 border border-slate-200 bg-white">
-                <img src="/logo.jpg" alt="Kiến An" className="w-full h-full object-cover" />
+                <img src="/logo-an-mark.svg" alt="An" className="w-full h-full object-contain p-1" />
               </div>
             )}
 
