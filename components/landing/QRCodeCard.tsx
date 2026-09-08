@@ -132,7 +132,7 @@ export default function QRCodeCard({
                 rel="noopener noreferrer"
                 className="w-full py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-md shadow-orange-500/20 transition-all transform active:scale-95"
               >
-                <span>{isApple ? "Mở cài đặt App Store" : "Mở tải Google Play"}</span>
+                <span>{isApple ? "Cài đặt ngay trên iPhone" : "Tải ứng dụng Android (APK)"}</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
 
