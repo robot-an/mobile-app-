@@ -31,3 +31,45 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #2563EB;
 }
+
+/* 3D Animations & Scanner Laser */
+@keyframes scanBeam {
+  0% {
+    top: 2%;
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    top: 96%;
+    opacity: 0.6;
+  }
+}
+
+@keyframes float3d {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+}
+
+@keyframes floatReverse3d {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(8px) rotate(-1deg);
+  }
+}
+
+.animate-float-3d {
+  animation: float3d 5s ease-in-out infinite;
+}
+
+.animate-float-reverse-3d {
+  animation: floatReverse3d 6s ease-in-out infinite;
+}
+
