@@ -53,7 +53,7 @@ export const APP_DOWNLOAD_CONFIG: DownloadConfig = {
       process.env.NEXT_PUBLIC_IOS_OTA_URL ||
       "",
     mobileConfigUrl: "/roboaian.mobileconfig",
-    primaryMethod: (process.env.NEXT_PUBLIC_IOS_PRIMARY_METHOD as any) || "auto",
+    primaryMethod: (process.env.NEXT_PUBLIC_IOS_PRIMARY_METHOD as any) || "mobileconfig",
     directQrToStore: process.env.NEXT_PUBLIC_IOS_DIRECT_QR === "true",
   },
 
@@ -64,7 +64,7 @@ export const APP_DOWNLOAD_CONFIG: DownloadConfig = {
     directApkUrl:
       process.env.NEXT_PUBLIC_ANDROID_APK_URL ||
       "/roboaian.apk",
-    primaryMethod: "playstore",
+    primaryMethod: (process.env.NEXT_PUBLIC_ANDROID_PRIMARY_METHOD as any) || "apk",
   },
 };
 
@@ -74,6 +74,9 @@ export const APP_DOWNLOAD_CONFIG: DownloadConfig = {
 export function getIosTargetUrl(methodOverride?: string): string {
   const method = methodOverride || APP_DOWNLOAD_CONFIG.ios.primaryMethod;
 
+  if (method === "mobileconfig") {
+    return APP_DOWNLOAD_CONFIG.ios.mobileConfigUrl;
+  }
   if (method === "appstore" && APP_DOWNLOAD_CONFIG.ios.appStoreUrl) {
     return APP_DOWNLOAD_CONFIG.ios.appStoreUrl;
   }
@@ -83,11 +86,8 @@ export function getIosTargetUrl(methodOverride?: string): string {
   if (method === "ota" && APP_DOWNLOAD_CONFIG.ios.otaManifestUrl) {
     return APP_DOWNLOAD_CONFIG.ios.otaManifestUrl;
   }
-  if (method === "mobileconfig") {
-    return APP_DOWNLOAD_CONFIG.ios.mobileConfigUrl;
-  }
 
-  // Chế độ 'auto': ưu tiên App Store nếu có cấu hình biến môi trường, hoặc TestFlight, hoặc appStoreUrl
+  // Chế độ 'auto': Nếu có cấu hình App Store thực tế thì mở Store, nếu chưa có thì tải mobileconfig trực tiếp
   if (process.env.NEXT_PUBLIC_IOS_APP_STORE_URL) {
     return process.env.NEXT_PUBLIC_IOS_APP_STORE_URL;
   }
@@ -95,5 +95,21 @@ export function getIosTargetUrl(methodOverride?: string): string {
     return process.env.NEXT_PUBLIC_IOS_TESTFLIGHT_URL;
   }
 
-  return APP_DOWNLOAD_CONFIG.ios.appStoreUrl;
+  return APP_DOWNLOAD_CONFIG.ios.mobileConfigUrl;
+}
+
+/**
+ * Lấy URL đích tự động cho thiết bị Android
+ */
+export function getAndroidTargetUrl(methodOverride?: string): string {
+  const method = methodOverride || APP_DOWNLOAD_CONFIG.android.primaryMethod;
+
+  if (method === "apk") {
+    return APP_DOWNLOAD_CONFIG.android.directApkUrl;
+  }
+  if (method === "playstore" && process.env.NEXT_PUBLIC_ANDROID_PLAY_STORE_URL) {
+    return process.env.NEXT_PUBLIC_ANDROID_PLAY_STORE_URL;
+  }
+
+  return APP_DOWNLOAD_CONFIG.android.directApkUrl;
 }

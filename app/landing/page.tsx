@@ -115,15 +115,15 @@ export default function LandingPage() {
           <QRCodeCard
             platform="ios"
             title="Ứng Dụng Cho iOS"
-            subtitle="iPhone & iPad (iOS 15.0+)"
+            subtitle="Cài trực tiếp thành App trên iPhone/iPad"
             url={iosQrUrl}
-            badgeLabel="Apple App Store"
+            badgeLabel="Hồ Sơ Cấu Hình iOS"
             versionReq="iOS 15+"
             fallbackDirectDownloadUrl="/roboaian.mobileconfig"
             features={[
-              "Chuông cảnh báo SOS âm lượng cao phá vỡ Im lặng",
-              "Định vị vệ tinh GPS độ trễ cực thấp",
-              "Nhắc uống thuốc và đồng bộ Sổ Y bạ tự động"
+              "Cài trực tiếp lên Màn hình chính iPhone không cần Store",
+              "Khởi chạy toàn màn hình như Native App",
+              "Chuông cảnh báo SOS & Sổ Y bạ thời gian thực"
             ]}
           />
 
@@ -131,13 +131,13 @@ export default function LandingPage() {
           <QRCodeCard
             platform="android"
             title="Ứng Dụng Cho Android"
-            subtitle="Mọi thiết bị Android (Android 10+)"
+            subtitle="Tải APK cài cho mọi thiết bị Android"
             url={androidQrUrl}
-            badgeLabel="Google Play / APK"
+            badgeLabel="File Cài Đặt Trực Tiếp (APK)"
             versionReq="Android 10+"
             fallbackDirectDownloadUrl="/roboaian.apk"
             features={[
-              "Còi hú cứu hộ tự kích hoạt khi té ngã",
+              "Cài đặt trực tiếp file APK cho mọi dòng máy Android",
               "Dịch vụ chạy nền tối ưu tiết kiệm pin",
               "Kết nối WiFi & Bluetooth BLE trực tiếp với Robot"
             ]}
