@@ -147,12 +147,43 @@ export default function IOSDownloadPage() {
             className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-sm sm:text-base flex items-center justify-center gap-2 shadow-lg shadow-orange-500/30 transition-all transform active:scale-95"
           >
             <Download className="w-5 h-5 animate-bounce" />
-            <span>Bấm Vào Đây Để Tải Xuống Ngay</span>
+            <span>Bấm Vào Đây Để Tải Hồ Sơ Cài Đặt</span>
           </button>
 
           <p className="text-[11px] text-slate-400">
-            Nếu màn hình không tự động chuyển, vui lòng bấm nút cam ở trên.
+            Nếu màn hình không tự động tải, vui lòng bấm nút cam ở trên.
           </p>
+        </div>
+
+        {/* Hướng dẫn hoàn tất khi iPhone hiện 'Đã tải về hồ sơ' */}
+        <div className="p-4 rounded-2xl bg-amber-50/90 border-2 border-amber-300 text-left space-y-2.5 shadow-sm">
+          <div className="flex items-center gap-2">
+            <span className="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-black">
+              ✓
+            </span>
+            <p className="text-xs font-black text-amber-950">
+              iPhone báo "Đã tải về hồ sơ"?
+            </p>
+          </div>
+          <p className="text-[11px] text-amber-900 leading-relaxed font-medium">
+            Thực hiện 2 bước đơn giản để hiện icon App Robot An ra Màn hình chính:
+          </p>
+          <div className="space-y-1.5 text-[11px] text-slate-700 bg-white/90 p-3 rounded-xl border border-amber-200 shadow-xs">
+            <p className="flex items-start gap-1.5">
+              <span className="font-bold text-orange-600 flex-shrink-0">1.</span>
+              <span>Bấm nút <strong>[Đóng]</strong> trên thông báo vừa hiện.</span>
+            </p>
+            <p className="flex items-start gap-1.5">
+              <span className="font-bold text-orange-600 flex-shrink-0">2.</span>
+              <span>
+                Vào <strong>Cài đặt (Settings)</strong> của iPhone &rarr; Chạm vào dòng <strong>"Đã tải về hồ sơ"</strong> ở ngay trên đầu &rarr; Bấm <strong>"Cài đặt"</strong> ở góc trên cùng bên phải.
+              </span>
+            </p>
+            <div className="pt-1 border-t border-slate-100 text-emerald-700 font-bold flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>Xong! Biểu tượng App Robot An đã có trên Màn hình chính.</span>
+            </div>
+          </div>
         </div>
 
         {/* Options & Fallbacks */}
