@@ -153,6 +153,38 @@ export interface MedicalRecord {
   setup_completed?: boolean;   // true sau khi người giám hộ hoàn tất luồng setup lần đầu
   owner_uid?: string;          // UID Firebase của người giám hộ đã hoàn tất setup
   created_at?: string;
+
+  // Bổ sung từ luồng nhập phiếu xét nghiệm (VD: MEDLATEC)
+  phone?: string;                    // SĐT bệnh nhân trên phiếu (khác emergency_contact)
+  diagnosis?: string;                // Chẩn đoán
+  health_classification?: string;    // Phân loại sức khỏe
+}
+
+// Danh mục xét nghiệm chi tiết - dùng khi nhập phiếu kết quả (VD: MEDLATEC)
+export interface LabTestResult {
+  category: string;             // "Danh mục khám" - VD: "Sinh hóa máu"
+  name: string;                 // Tên xét nghiệm cụ thể
+  value: string;                // Kết quả
+  unit?: string;
+  reference_range?: string;     // Khoảng tham chiếu
+  note?: string;
+  is_abnormal?: boolean;
+}
+
+// 1 lần nhập phiếu xét nghiệm - lưu tại medical_records/{robot_id}/lab_imports/{id}
+export interface LabImport {
+  source: string;                // "medlatec" | "manual"
+  test_code?: string;
+  test_date?: string;
+  facility?: string;
+  ordering_doctor?: string;
+  status?: string;
+  diagnosis?: string;
+  health_classification?: string;
+  recommendations?: string;
+  results: LabTestResult[];
+  imported_at: string;
+  imported_by: string;           // uid người bấm import
 }
 
 // 4. Cơ Sở Tri Thức RAG & Vector Embeddings (RAG Knowledge Base)
