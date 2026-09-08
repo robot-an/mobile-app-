@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>FullScreen</key>
+			<true/>
+			<key>IsRemovable</key>
+			<true/>
+			<key>Label</key>
+			<string>Robot An</string>
+			<key>PayloadDescription</key>
+			<string>Cài đặt ứng dụng Giám hộ y tế Robot An lên Màn hình chính iPhone</string>
+			<key>PayloadDisplayName</key>
+			<string>Robot An</string>
+			<key>PayloadIdentifier</key>
+			<string>com.roboaian.app.webclip</string>
+			<key>PayloadType</key>
+			<string>com.apple.webClip.managed</string>
+			<key>PayloadUUID</key>
+			<string>E9C682A4-32E1-4D39-8C9B-94E5D42D118E</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+			<key>Precomposed</key>
+			<true/>
+			<key>URL</key>
+			<string>https://www.roboaian.com/</string>
+		</dict>
+	</array>
+	<key>PayloadDescription</key>
+	<string>Hồ sơ cài đặt ứng dụng Robot An cho iPhone &amp; iPad</string>
+	<key>PayloadDisplayName</key>
+	<string>Cài Đặt Robot An</string>
+	<key>PayloadIdentifier</key>
+	<string>com.roboaian.profile</string>
+	<key>PayloadOrganization</key>
+	<string>Robot Y Tế An</string>
+	<key>PayloadRemovalDisallowed</key>
+	<false/>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>A1F7B8C9-5D3E-4B2A-91C0-83D2E4F6A901</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+</dict>
+</plist>

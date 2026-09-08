@@ -97,6 +97,14 @@ export default function LoginScreen() {
           </>
         )}
       </button>
+
+      <a
+        href="/landing"
+        className="mt-6 text-xs text-slate-500 hover:text-navy-900 font-semibold inline-flex items-center gap-1.5 transition-colors py-1.5 px-3 rounded-lg hover:bg-slate-100"
+      >
+        <span>Tìm hiểu về Robot An & Quét mã QR tải App</span>
+        <span className="text-medical-blue">→</span>
+      </a>
     </div>
   );
 }

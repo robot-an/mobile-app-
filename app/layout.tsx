@@ -30,6 +30,8 @@ export const viewport: Viewport = {
   themeColor: "#173A56",
 };
 
+import AppShell from "@/components/AppShell";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -42,28 +44,8 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-touch-fullscreen" content="yes" />
       </head>
-      <body className="bg-slate-950 h-full flex justify-center text-slate-900 antialiased selection:bg-medical-blue selection:text-white overflow-hidden select-none">
-        {/* Khung App Điện Thoại Di Động Cố Định (Fixed 100dvh Viewport) */}
-        <div className="w-full max-w-md h-[100dvh] max-h-[100dvh] bg-slate-50 shadow-2xl relative flex flex-col border-x border-slate-200 overflow-hidden">
-          {/* Chặn toàn bộ nội dung phía sau đăng nhập + thiết lập Sổ Y Bạ lần đầu */}
-          <AuthGate>
-            <HeaderActionProvider>
-              {/* Header Cố Định Ở Đầu */}
-              <MobileHeader />
-
-              {/* Container Nội Dung Chính Không Bị Cuộn Khung Ngoại */}
-              <main className="flex-1 overflow-hidden relative flex flex-col">
-                {children}
-              </main>
-            </HeaderActionProvider>
-
-            {/* Thanh Điều Hướng Đáy Cố Định */}
-            <BottomNav />
-
-            {/* Báo thức nhắc thuốc - chạy nền toàn app, không phụ thuộc trang đang mở */}
-            <ReminderAlarm />
-          </AuthGate>
-        </div>
+      <body className="min-h-screen w-full bg-slate-950 flex justify-center text-slate-900 antialiased selection:bg-medical-blue selection:text-white">
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );
