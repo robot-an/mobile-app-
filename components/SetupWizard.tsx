@@ -16,16 +16,42 @@ import {
   AlertTriangle,
   Loader2,
   PartyPopper,
-  ClipboardList
+  ClipboardList,
+  Link2,
+  FileCheck2
 } from "lucide-react";
 import {
   db,
   doc,
   setDoc,
+  collection,
+  addDoc,
   MedicalRecord,
+  LabTestResult,
   User as FirebaseUser
 } from "@/lib/firebase";
 import AppLogo from "@/components/AppLogo";
+import ImportLabLinkModal, { ParsedLabImport } from "@/components/ImportLabLinkModal";
+
+function mapLabResultsToBiometrics(results: ParsedLabImport["results"]) {
+  const biometrics: Record<string, number> = {};
+  const patterns: Array<[RegExp, string]> = [
+    [/cholesterol.*(toàn phần|total)/i, "cholesterol_total"],
+    [/ldl/i, "cholesterol_ldl"],
+    [/(glucose|đường huyết)/i, "blood_glucose_mmol"],
+    [/(nhịp tim|heart rate)/i, "heart_rate_bpm"],
+    [/spo2|sp02|bão hòa oxy/i, "spo2_percent"]
+  ];
+  for (const r of results || []) {
+    for (const [pattern, field] of patterns) {
+      if (pattern.test(r.name || "")) {
+        const num = parseFloat((r.value || "").replace(",", "."));
+        if (!isNaN(num)) biometrics[field] = num;
+      }
+    }
+  }
+  return biometrics;
+}
 
 interface SetupWizardProps {
   robotId: string;
@@ -39,6 +65,8 @@ export default function SetupWizard({ robotId, user, onComplete }: SetupWizardPr
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [pendingLabImport, setPendingLabImport] = useState<ParsedLabImport | null>(null);
 
   const [formData, setFormData] = useState<Partial<MedicalRecord>>({
     robot_id: robotId,
@@ -86,6 +114,37 @@ export default function SetupWizard({ robotId, user, onComplete }: SetupWizardPr
     }));
   };
 
+  const handleImported = (parsed: ParsedLabImport) => {
+    const currentYear = new Date().getFullYear();
+    const mappedBiometrics = mapLabResultsToBiometrics(parsed.results);
+
+    setFormData((prev) => ({
+      ...prev,
+      full_name: parsed.full_name || prev.full_name,
+      gender: parsed.gender || prev.gender,
+      age: parsed.birth_year ? currentYear - parsed.birth_year : prev.age,
+      phone: parsed.phone || prev.phone,
+      diagnosis: parsed.diagnosis || prev.diagnosis,
+      health_classification: parsed.health_classification || prev.health_classification,
+      medical_history: prev.medical_history || parsed.diagnosis || "",
+      notes: parsed.recommendations || prev.notes,
+      primary_doctor: {
+        name: parsed.ordering_doctor || prev.primary_doctor?.name || "",
+        hospital: parsed.facility || prev.primary_doctor?.hospital || "",
+        phone: prev.primary_doctor?.phone || "",
+        specialty: prev.primary_doctor?.specialty || ""
+      },
+      baseline_biometrics: {
+        ...(prev.baseline_biometrics as any),
+        ...mappedBiometrics
+      }
+    }));
+
+    setPendingLabImport(parsed);
+    setShowImportModal(false);
+    setStep(5);
+  };
+
   const isPersonalValid = (formData.full_name || "").trim().length > 0 && (formData.age || 0) > 0;
   const isContactValid = (formData.emergency_contact || "").trim().length > 0;
 
@@ -120,6 +179,26 @@ export default function SetupWizard({ robotId, user, onComplete }: SetupWizardPr
       };
 
       await setDoc(doc(db, "medical_records", robotId), payload, { merge: true });
+
+      if (pendingLabImport) {
+        const importPayload = {
+          source: "medlatec",
+          test_code: pendingLabImport.test_code || null,
+          test_date: pendingLabImport.test_date || null,
+          facility: pendingLabImport.facility || null,
+          ordering_doctor: pendingLabImport.ordering_doctor || null,
+          status: pendingLabImport.status || null,
+          diagnosis: pendingLabImport.diagnosis || null,
+          health_classification: pendingLabImport.health_classification || null,
+          recommendations: pendingLabImport.recommendations || null,
+          results: pendingLabImport.results || [],
+          imported_at: new Date().toISOString(),
+          imported_by: user.uid
+        };
+        await addDoc(collection(db, "medical_records", robotId, "lab_imports"), importPayload).catch((err) =>
+          console.warn("Lưu lịch sử phiếu xét nghiệm thất bại:", err)
+        );
+      }
 
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://robot-an-backend.onrender.com";
       await fetch(`${backendUrl}/api/medical-records?robot_id=${robotId}`, {
@@ -183,6 +262,15 @@ export default function SetupWizard({ robotId, user, onComplete }: SetupWizardPr
                 Thông tin cá nhân → Bệnh lý → Sinh hiệu → Liên hệ khẩn cấp
               </p>
             </div>
+
+            <button
+              type="button"
+              onClick={() => setShowImportModal(true)}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-medical-blue hover:text-medical-hover underline underline-offset-2"
+            >
+              <Link2 className="w-3.5 h-3.5" />
+              <span>Hoặc dán link phiếu xét nghiệm để điền tự động</span>
+            </button>
           </div>
         )}
 
@@ -461,6 +549,24 @@ export default function SetupWizard({ robotId, user, onComplete }: SetupWizardPr
               <p className="text-xs font-bold text-emerald-800">Sắp xong! Kiểm tra lại thông tin trước khi lưu.</p>
             </div>
 
+            {pendingLabImport && (
+              <div className="p-3 bg-blue-50/70 border border-blue-100 rounded-xl space-y-1.5">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-medical-blue">
+                  <FileCheck2 className="w-3.5 h-3.5" />
+                  <span>Đã đọc từ phiếu xét nghiệm</span>
+                </div>
+                {formData.diagnosis && (
+                  <p className="text-[11px] text-slate-700"><span className="font-bold">Chẩn đoán:</span> {formData.diagnosis}</p>
+                )}
+                {formData.health_classification && (
+                  <p className="text-[11px] text-slate-700"><span className="font-bold">Phân loại sức khỏe:</span> {formData.health_classification}</p>
+                )}
+                <p className="text-[11px] text-slate-700">
+                  <span className="font-bold">Số chỉ số xét nghiệm:</span> {pendingLabImport.results?.length || 0} mục — sẽ lưu vào lịch sử Sổ Y Bạ
+                </p>
+              </div>
+            )}
+
             <div className="bg-white border border-slate-200 rounded-2xl p-3.5 space-y-2 text-xs">
               <div className="flex justify-between py-1 border-b border-slate-100">
                 <span className="text-slate-500 font-medium">Họ tên</span>
@@ -540,6 +646,10 @@ export default function SetupWizard({ robotId, user, onComplete }: SetupWizardPr
           </button>
         )}
       </div>
+
+      {showImportModal && (
+        <ImportLabLinkModal onClose={() => setShowImportModal(false)} onImported={handleImported} />
+      )}
     </div>
   );
 }

@@ -14,7 +14,9 @@ import {
   Plus,
   Trash2,
   Building,
-  ShieldAlert
+  ShieldAlert,
+  Link2,
+  FileCheck2
 } from "lucide-react";
 import {
   MedicalRecord,
@@ -22,17 +24,51 @@ import {
   db,
   doc,
   setDoc,
-  onSnapshot
+  onSnapshot,
+  collection,
+  addDoc,
+  auth,
+  onAuthStateChanged,
+  User as FirebaseUser
 } from "@/lib/firebase";
 import { useHeaderAction } from "@/lib/header-action-context";
+import ImportLabLinkModal, { ParsedLabImport } from "@/components/ImportLabLinkModal";
+
+function mapLabResultsToBiometrics(results: ParsedLabImport["results"]) {
+  const biometrics: Record<string, number> = {};
+  const patterns: Array<[RegExp, string]> = [
+    [/cholesterol.*(toàn phần|total)/i, "cholesterol_total"],
+    [/ldl/i, "cholesterol_ldl"],
+    [/(glucose|đường huyết)/i, "blood_glucose_mmol"],
+    [/(nhịp tim|heart rate)/i, "heart_rate_bpm"],
+    [/spo2|sp02|bão hòa oxy/i, "spo2_percent"]
+  ];
+  for (const r of results || []) {
+    for (const [pattern, field] of patterns) {
+      if (pattern.test(r.name || "")) {
+        const num = parseFloat((r.value || "").replace(",", "."));
+        if (!isNaN(num)) biometrics[field] = num;
+      }
+    }
+  }
+  return biometrics;
+}
 
 export default function MobileMedicalRecordPage() {
   const robotId = "an_robot_01";
-  
+
   const [activeTab, setActiveTab] = useState<"personal" | "medical" | "biometrics" | "medications" | "contraindications" | "contact">("personal");
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [pendingLabImport, setPendingLabImport] = useState<ParsedLabImport | null>(null);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => setUser(u));
+    return () => unsub();
+  }, []);
 
   const [formData, setFormData] = useState<MedicalRecord>({
     robot_id: robotId,
@@ -184,6 +220,36 @@ export default function MobileMedicalRecordPage() {
     }));
   };
 
+  const handleImported = (parsed: ParsedLabImport) => {
+    const currentYear = new Date().getFullYear();
+    const mappedBiometrics = mapLabResultsToBiometrics(parsed.results);
+
+    setFormData((prev) => ({
+      ...prev,
+      full_name: parsed.full_name || prev.full_name,
+      gender: parsed.gender || prev.gender,
+      age: parsed.birth_year ? currentYear - parsed.birth_year : prev.age,
+      phone: parsed.phone || prev.phone,
+      diagnosis: parsed.diagnosis || prev.diagnosis,
+      health_classification: parsed.health_classification || prev.health_classification,
+      notes: parsed.recommendations || prev.notes,
+      primary_doctor: {
+        name: parsed.ordering_doctor || prev.primary_doctor?.name || "",
+        hospital: parsed.facility || prev.primary_doctor?.hospital || "",
+        phone: prev.primary_doctor?.phone || "",
+        specialty: prev.primary_doctor?.specialty || ""
+      },
+      baseline_biometrics: {
+        ...(prev.baseline_biometrics as any),
+        ...mappedBiometrics
+      }
+    }));
+
+    setPendingLabImport(parsed);
+    setShowImportModal(false);
+    setActiveTab("personal");
+  };
+
   const weight = formData.baseline_biometrics?.weight_kg || 0;
   const heightM = (formData.baseline_biometrics?.height_cm || 0) / 100;
   const bmi = weight > 0 && heightM > 0 ? (weight / (heightM * heightM)).toFixed(1) : "—";
@@ -200,6 +266,27 @@ export default function MobileMedicalRecordPage() {
       };
 
       await setDoc(doc(db, "medical_records", robotId), payload, { merge: true });
+
+      if (pendingLabImport) {
+        const importPayload = {
+          source: "medlatec",
+          test_code: pendingLabImport.test_code || null,
+          test_date: pendingLabImport.test_date || null,
+          facility: pendingLabImport.facility || null,
+          ordering_doctor: pendingLabImport.ordering_doctor || null,
+          status: pendingLabImport.status || null,
+          diagnosis: pendingLabImport.diagnosis || null,
+          health_classification: pendingLabImport.health_classification || null,
+          recommendations: pendingLabImport.recommendations || null,
+          results: pendingLabImport.results || [],
+          imported_at: new Date().toISOString(),
+          imported_by: user?.uid || "unknown"
+        };
+        await addDoc(collection(db, "medical_records", robotId, "lab_imports"), importPayload).catch((err) =>
+          console.warn("Lưu lịch sử phiếu xét nghiệm thất bại:", err)
+        );
+        setPendingLabImport(null);
+      }
 
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://robot-an-backend.onrender.com";
       await fetch(`${backendUrl}/api/medical-records?robot_id=${robotId}`, {
@@ -244,6 +331,24 @@ export default function MobileMedicalRecordPage() {
           <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0" />
           <span>{saveError}</span>
         </div>
+      )}
+
+      {pendingLabImport ? (
+        <div className="p-3 bg-blue-50/70 border border-blue-100 rounded-xl flex items-center gap-2.5 flex-shrink-0">
+          <FileCheck2 className="w-4 h-4 text-medical-blue flex-shrink-0" />
+          <p className="text-[11px] font-semibold text-slate-700 flex-1">
+            Đã điền {pendingLabImport.results?.length || 0} chỉ số từ phiếu xét nghiệm — kiểm tra lại rồi bấm Lưu ở góc trên để ghi vào Sổ Y Bạ.
+          </p>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setShowImportModal(true)}
+          className="flex-shrink-0 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-100 text-medical-blue font-bold text-xs transition-colors self-start"
+        >
+          <Link2 className="w-3.5 h-3.5" />
+          <span>Nhập từ phiếu xét nghiệm (dán link)</span>
+        </button>
       )}
 
       {/* Tabs: moi tab chi hien thi dung 1 nhom du lieu, khong can cuon nhieu */}
@@ -912,6 +1017,10 @@ export default function MobileMedicalRecordPage() {
         )}
 
       </form>
+
+      {showImportModal && (
+        <ImportLabLinkModal onClose={() => setShowImportModal(false)} onImported={handleImported} />
+      )}
     </div>
   );
 }
