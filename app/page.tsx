@@ -136,7 +136,6 @@ export default function MobileDashboard() {
           latitude={status.latitude}
           longitude={status.longitude}
           address={status.address}
-          robotId={status.robot_id}
           isOnline={status.is_online}
           fallDetected={isCritical}
           height="h-full min-h-[220px]"
