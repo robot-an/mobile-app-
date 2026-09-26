@@ -2,13 +2,16 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { 
-  Heart, 
-  Activity, 
-  ChevronRight, 
+import {
+  Heart,
+  Activity,
+  ChevronRight,
   AlertTriangle,
   RotateCcw,
-  Pill
+  Pill,
+  Footprints,
+  PauseCircle,
+  Vibrate
 } from "lucide-react";
 import { 
   RobotStatus, 
@@ -48,7 +51,8 @@ export default function MobileDashboard() {
     heart_rate: 74,
     body_temp: 36.6,
     fall_risk_score: 12,
-    sos_alert: false
+    sos_alert: false,
+    motion_state: "stationary"
   });
 
   useEffect(() => {
@@ -107,6 +111,15 @@ export default function MobileDashboard() {
 
   const isCritical = Boolean(status.fall_detected || status.sos_alert);
 
+  const MOTION_STATE_CONFIG = {
+    stationary: { label: "Đang đứng yên", icon: PauseCircle, color: "text-slate-600", bg: "bg-slate-50", border: "border-slate-200" },
+    moving: { label: "Đang di chuyển", icon: Footprints, color: "text-medical-blue", bg: "bg-blue-50", border: "border-blue-100" },
+    shaking: { label: "Phát hiện rung lắc mạnh", icon: Vibrate, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200" },
+    free_fall: { label: "Vừa phát hiện cú ngã/rơi tự do", icon: AlertTriangle, color: "text-red-600", bg: "bg-red-50", border: "border-red-200" }
+  } as const;
+  const motionInfo = MOTION_STATE_CONFIG[status.motion_state || "stationary"];
+  const MotionIcon = motionInfo.icon;
+
   return (
     <div className="flex-1 flex flex-col p-3 pb-20 overflow-hidden space-y-2.5 select-none h-full">
       {/* Còi báo động ngã */}
@@ -140,6 +153,17 @@ export default function MobileDashboard() {
           fallDetected={isCritical}
           height="h-full min-h-[220px]"
         />
+      </div>
+
+      {/* 2b. TRẠNG THÁI CHUYỂN ĐỘNG ROBOT (Cảm biến MPU6050) */}
+      <div className={`rounded-2xl p-3 border shadow-card flex items-center gap-2.5 flex-shrink-0 ${motionInfo.bg} ${motionInfo.border}`}>
+        <div className={`w-9 h-9 rounded-xl bg-white border ${motionInfo.border} flex items-center justify-center flex-shrink-0 ${motionInfo.color}`}>
+          <MotionIcon className="w-4.5 h-4.5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500">Trạng Thái Chuyển Động (IMU)</p>
+          <p className={`text-xs font-bold truncate ${motionInfo.color}`}>{motionInfo.label}</p>
+        </div>
       </div>
 
       {/* 3. THẺ BÁC SĨ KỸ THUẬT SỐ & SINH HIỆU (Digital Doctor Card) */}

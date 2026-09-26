@@ -221,6 +221,7 @@ export interface RobotStatus {
   ambient_temp?: number;
   humidity?: number;
   fall_risk_score?: number;         // Điểm đánh giá nguy cơ té ngã dựa trên gia tốc rung lắc (0-100)
+  motion_state?: "stationary" | "moving" | "shaking" | "free_fall"; // Trạng thái chuyển động tức thời từ MPU6050
   active_rag_model?: string;        // "gemini-1.5-pro + text-embedding-004"
   hardware_version?: string;        // "ESP32-WROOM-32D v2.1"
 }
