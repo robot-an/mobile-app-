@@ -16,7 +16,10 @@ import {
   Sliders,
   Cloud,
   Check,
-  RefreshCw
+  RefreshCw,
+  Wifi,
+  Loader2,
+  AlertTriangle
 } from "lucide-react";
 import { 
   auth, 
@@ -50,6 +53,13 @@ export default function MobileSettingsPage() {
   const [syncStatus, setSyncStatus] = useState<"synced" | "saving" | "idle">("synced");
   const isInitialLoad = useRef(true);
   const autosaveTimerRef = useRef<any>(null);
+
+  // Cấu hình WiFi cho Robot (đổi mạng khi robot đang online qua mạng cũ)
+  const [wifiSsid, setWifiSsid] = useState<string>("");
+  const [wifiPassword, setWifiPassword] = useState<string>("");
+  const [wifiSending, setWifiSending] = useState<boolean>(false);
+  const [wifiResetting, setWifiResetting] = useState<boolean>(false);
+  const [wifiFeedback, setWifiFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // 1. Theo dõi trạng thái tài khoản
   useEffect(() => {
@@ -195,6 +205,46 @@ export default function MobileSettingsPage() {
         setSyncStatus("synced");
       }
     }, 450);
+  };
+
+  const handleSendWifiConfig = async () => {
+    if (!wifiSsid.trim() || wifiSending) return;
+    setWifiSending(true);
+    setWifiFeedback(null);
+    try {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://robot-an-backend.onrender.com";
+      const res = await fetch(`${backendUrl}/api/wifi-config`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ robot_id: robotId, ssid: wifiSsid.trim(), password: wifiPassword })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.detail || "Gửi cấu hình thất bại");
+      setWifiFeedback({ type: "success", text: data.message || "Đã gửi cấu hình WiFi mới xuống robot." });
+      setWifiPassword("");
+    } catch (err: any) {
+      setWifiFeedback({ type: "error", text: err?.message || "Không gửi được cấu hình WiFi. Kiểm tra robot có đang online không." });
+    } finally {
+      setWifiSending(false);
+    }
+  };
+
+  const handleResetWifi = async () => {
+    if (wifiResetting) return;
+    if (!confirm("Robot sẽ xóa WiFi đã lưu và khởi động lại vào chế độ cấu hình AP. Tiếp tục?")) return;
+    setWifiResetting(true);
+    setWifiFeedback(null);
+    try {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://robot-an-backend.onrender.com";
+      const res = await fetch(`${backendUrl}/api/wifi-reset?robot_id=${robotId}`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.detail || "Đặt lại WiFi thất bại");
+      setWifiFeedback({ type: "success", text: data.message || "Đã yêu cầu robot đặt lại WiFi." });
+    } catch (err: any) {
+      setWifiFeedback({ type: "error", text: err?.message || "Không gửi được lệnh đặt lại WiFi." });
+    } finally {
+      setWifiResetting(false);
+    }
   };
 
   const handleGoogleSignIn = async () => {
@@ -419,6 +469,65 @@ export default function MobileSettingsPage() {
             placeholder="0912.345.678"
             className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-900 focus:border-medical-blue"
           />
+        </div>
+      </div>
+
+      {/* 4b. CÀI ĐẶT: KẾT NỐI WIFI CHO ROBOT */}
+      <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-card space-y-3">
+        <label className="block text-xs font-bold text-slate-900 flex items-center gap-1.5">
+          <Wifi className="w-4 h-4 text-medical-blue" />
+          <span>Kết Nối WiFi Cho Robot</span>
+        </label>
+        <p className="text-[10px] text-slate-500 -mt-2 leading-relaxed">
+          Dùng khi Robot đang online qua mạng cũ và bạn muốn đổi sang mạng khác. Nếu Robot đang
+          offline hoàn toàn (lần đầu thiết lập), hãy kết nối điện thoại vào WiFi <span className="font-mono font-bold">RobotAn-Setup</span> (mật khẩu <span className="font-mono font-bold">anbotsetup</span>) do chính Robot phát ra để chọn mạng nhà và điền mật khẩu.
+        </p>
+
+        <div className="space-y-2">
+          <input
+            type="text"
+            value={wifiSsid}
+            onChange={(e) => setWifiSsid(e.target.value)}
+            placeholder="Tên mạng WiFi (SSID)"
+            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-900 bg-white focus:border-medical-blue focus:ring-0"
+          />
+          <input
+            type="password"
+            value={wifiPassword}
+            onChange={(e) => setWifiPassword(e.target.value)}
+            placeholder="Mật khẩu WiFi"
+            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-900 bg-white focus:border-medical-blue focus:ring-0"
+          />
+        </div>
+
+        {wifiFeedback && (
+          <div className={`p-2.5 rounded-xl text-[11px] font-bold flex items-start gap-1.5 ${
+            wifiFeedback.type === "success" ? "bg-emerald-50 text-emerald-800 border border-emerald-200" : "bg-red-50 text-red-800 border border-red-200"
+          }`}>
+            {wifiFeedback.type === "success" ? <Check className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" /> : <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />}
+            <span>{wifiFeedback.text}</span>
+          </div>
+        )}
+
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={handleSendWifiConfig}
+            disabled={!wifiSsid.trim() || wifiSending}
+            className="py-2.5 px-3 bg-medical-blue hover:bg-medical-hover text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 active:scale-95 transition-all disabled:opacity-40"
+          >
+            {wifiSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wifi className="w-3.5 h-3.5" />}
+            <span>{wifiSending ? "Đang gửi..." : "Gửi cấu hình"}</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleResetWifi}
+            disabled={wifiResetting}
+            className="py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 active:scale-95 transition-all disabled:opacity-40 border border-slate-200"
+          >
+            {wifiResetting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+            <span>Đặt lại WiFi</span>
+          </button>
         </div>
       </div>
 
