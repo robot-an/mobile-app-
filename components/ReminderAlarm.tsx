@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { CareSchedule, db, collection, onSnapshot, query, where } from "@/lib/firebase";
 import { getVietnamNow } from "@/lib/time";
+import { useRobotId } from "@/lib/robot-context";
 
 // Chuong bao thuc that (khong can file audio) - tong hop bang Web Audio API,
 // kieu chuong cua 2 not "ding-dong" de nguoi dung phan biet duoc voi tieng thong bao thuong.
@@ -39,7 +40,8 @@ function playBellChime() {
 
 // Component nay duoc mount 1 lan duy nhat trong layout.tsx (ngang hang MobileHeader/BottomNav)
 // nen bao thuc chay xuyen suot toan app, khong phu thuoc dang o trang nao.
-export default function ReminderAlarm({ robotId = "an_robot_01" }: { robotId?: string }) {
+export default function ReminderAlarm() {
+  const robotId = useRobotId();
   const schedulesRef = useRef<CareSchedule[]>([]);
   const firedThisMinuteRef = useRef<Set<string>>(new Set());
 

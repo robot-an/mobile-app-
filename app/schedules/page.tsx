@@ -32,9 +32,10 @@ import {
   query,
   where
 } from "@/lib/firebase";
+import { useRobotId } from "@/lib/robot-context";
 
 export default function SchedulesPage() {
-  const robotId = "an_robot_01";
+  const robotId = useRobotId();
 
   const [schedules, setSchedules] = useState<CareSchedule[]>([
     {

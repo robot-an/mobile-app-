@@ -31,6 +31,8 @@ import {
   onAuthStateChanged,
   User as FirebaseUser
 } from "@/lib/firebase";
+import { backendFetch } from "@/lib/backend";
+import { useRobotId } from "@/lib/robot-context";
 import { useHeaderAction } from "@/lib/header-action-context";
 import ImportLabLinkModal, { ParsedLabImport } from "@/components/ImportLabLinkModal";
 
@@ -55,7 +57,7 @@ function mapLabResultsToBiometrics(results: ParsedLabImport["results"]) {
 }
 
 export default function MobileMedicalRecordPage() {
-  const robotId = "an_robot_01";
+  const robotId = useRobotId();
 
   const [activeTab, setActiveTab] = useState<"personal" | "medical" | "biometrics" | "medications" | "contraindications" | "contact">("personal");
   const [saving, setSaving] = useState(false);
@@ -288,8 +290,7 @@ export default function MobileMedicalRecordPage() {
         setPendingLabImport(null);
       }
 
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://robot-an-backend.onrender.com";
-      await fetch(`${backendUrl}/api/medical-records?robot_id=${robotId}`, {
+      await backendFetch(`/api/medical-records?robot_id=${robotId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { X, Link2, Loader2, AlertTriangle, Sparkles } from "lucide-react";
+import { backendFetch } from "@/lib/backend";
 
 export interface ParsedLabImport {
   full_name: string | null;
@@ -45,8 +46,7 @@ export default function ImportLabLinkModal({ onClose, onImported }: ImportLabLin
     setError(null);
 
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://robot-an-backend.onrender.com";
-      const res = await fetch(`${backendUrl}/api/import-medical-record`, {
+      const res = await backendFetch(`/api/import-medical-record`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ link: trimmed })

@@ -10,10 +10,12 @@ import {
   Filter,
   CheckCircle2
 } from "lucide-react";
-import { AlertLog, db, collection, query, orderBy, limit, onSnapshot } from "@/lib/firebase";
+import { AlertLog, db, collection, query, where, orderBy, limit, onSnapshot } from "@/lib/firebase";
+import { backendFetch } from "@/lib/backend";
+import { useRobotId } from "@/lib/robot-context";
 
 export default function MobileAlertsPage() {
-  const robotId = "an_robot_01";
+  const robotId = useRobotId();
   const [logs, setLogs] = useState<AlertLog[]>([]);
   const [filter, setFilter] = useState<"ALL" | "CRITICAL" | "INFO">("ALL");
   const [resetting, setResetting] = useState(false);
@@ -22,6 +24,7 @@ export default function MobileAlertsPage() {
     try {
       const q = query(
         collection(db, "logs"),
+        where("robot_id", "==", robotId),
         orderBy("timestamp", "desc"),
         limit(30)
       );
@@ -42,8 +45,7 @@ export default function MobileAlertsPage() {
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://robot-an-backend.onrender.com";
-        const res = await fetch(`${backendUrl}/api/logs?robot_id=${robotId}`);
+        const res = await backendFetch(`/api/logs?robot_id=${robotId}`);
         const data = await res.json();
         if (data.success && data.data) {
           setLogs(data.data);
@@ -59,8 +61,7 @@ export default function MobileAlertsPage() {
   const handleResetSOS = async () => {
     setResetting(true);
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://robot-an-backend.onrender.com";
-      await fetch(`${backendUrl}/api/reset-sos?robot_id=${robotId}`, { method: "POST" });
+      await backendFetch(`/api/reset-sos?robot_id=${robotId}`, { method: "POST" });
     } catch (err) {} finally {
       setResetting(false);
     }

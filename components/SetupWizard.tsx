@@ -30,6 +30,7 @@ import {
   LabTestResult,
   User as FirebaseUser
 } from "@/lib/firebase";
+import { backendFetch } from "@/lib/backend";
 import AppLogo from "@/components/AppLogo";
 import ImportLabLinkModal, { ParsedLabImport } from "@/components/ImportLabLinkModal";
 
@@ -200,8 +201,7 @@ export default function SetupWizard({ robotId, user, onComplete }: SetupWizardPr
         );
       }
 
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://robot-an-backend.onrender.com";
-      await fetch(`${backendUrl}/api/medical-records?robot_id=${robotId}`, {
+      await backendFetch(`/api/medical-records?robot_id=${robotId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)

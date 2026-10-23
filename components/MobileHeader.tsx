@@ -17,11 +17,13 @@ import { auth, onAuthStateChanged, User as FirebaseUser, db, doc, onSnapshot, Ro
 import UserAvatar from "@/components/UserAvatar";
 import AppLogo from "@/components/AppLogo";
 import { useHeaderActionContext } from "@/lib/header-action-context";
+import { useRobotId } from "@/lib/robot-context";
 
 export default function MobileHeader() {
   const pathname = usePathname();
   const isHome = pathname === "/";
   const { action: headerAction } = useHeaderActionContext();
+  const robotId = useRobotId();
 
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [robotStatus, setRobotStatus] = useState<RobotStatus | null>(null);
@@ -33,14 +35,14 @@ export default function MobileHeader() {
 
   useEffect(() => {
     try {
-      const unsubStatus = onSnapshot(doc(db, "status", "an_robot_01"), (snap) => {
+      const unsubStatus = onSnapshot(doc(db, "status", robotId), (snap) => {
         if (snap.exists()) {
           setRobotStatus(snap.data() as RobotStatus);
         }
       });
       return () => unsubStatus();
     } catch (e) {}
-  }, []);
+  }, [robotId]);
 
   const isOnline = robotStatus?.is_online ?? true;
   const isCritical = robotStatus?.fall_detected || robotStatus?.sos_alert;
