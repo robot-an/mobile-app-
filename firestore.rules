@@ -2,35 +2,80 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Toàn bộ dữ liệu Robot An chỉ đọc/ghi được khi đã đăng nhập Google
-    // (khớp với AuthGate chặn truy cập app phía client).
-    match /medical_records/{id} {
-      allow read, write: if request.auth != null;
+    // Mỗi tài khoản Google có 1 hồ sơ riêng: medical_records/{robotId} với owner_uid = uid
+    // của chủ hồ sơ. Hồ sơ mới chỉ được tạo với ID = chính uid người tạo, nên 2 user không
+    // bao giờ trùng hay ghi đè hồ sơ của nhau. Robot thật (VD an_robot_01) được gán chủ bằng
+    // script admin software/backend/scripts/assign_robot_owner.py - client không tự nhận được.
+    // Backend dùng Admin SDK nên không bị các rule này chặn.
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isRobotOwner(robotId) {
+      let path = /databases/$(database)/documents/medical_records/$(robotId);
+      return isSignedIn()
+        && exists(path)
+        && get(path).data.owner_uid == request.auth.uid;
+    }
+
+    match /medical_records/{robotId} {
+      // Hồ sơ ID = uid được phép đọc cả khi chưa tồn tại, để AuthGate biết cần mở SetupWizard.
+      allow get: if isSignedIn() && (
+        resource == null
+          ? robotId == request.auth.uid
+          : resource.data.owner_uid == request.auth.uid
+      );
+      // AuthGate tìm robot mình sở hữu bằng where("owner_uid", "==", uid).
+      allow list: if isSignedIn() && resource.data.owner_uid == request.auth.uid;
+      allow create: if isSignedIn()
+        && robotId == request.auth.uid
+        && request.resource.data.owner_uid == request.auth.uid;
+      // Không cho đổi owner_uid để chuyển hồ sơ sang người khác.
+      allow update: if isSignedIn()
+        && resource.data.owner_uid == request.auth.uid
+        && request.resource.data.owner_uid == request.auth.uid;
 
       match /lab_imports/{importId} {
-        allow read, write: if request.auth != null;
+        allow read, write: if isRobotOwner(robotId);
       }
     }
-    match /status/{id} {
-      allow read, write: if request.auth != null;
+
+    // Tài liệu có ID = robotId
+    match /status/{robotId} {
+      allow read, write: if isRobotOwner(robotId);
     }
-    match /config/{id} {
-      allow read, write: if request.auth != null;
+    match /config/{robotId} {
+      allow read, write: if isRobotOwner(robotId);
     }
-    match /configs/{id} {
-      allow read, write: if request.auth != null;
+    match /configs/{robotId} {
+      allow read, write: if isRobotOwner(robotId);
     }
+
+    // Tài liệu gắn robot qua field robot_id: truy vấn danh sách phải có
+    // where("robot_id", "==", robotId) thì rule mới chứng minh được quyền đọc.
+    // Khi sửa không được đổi robot_id để "chuyển" bản ghi sang robot của người khác.
     match /care_schedules/{id} {
-      allow read, write: if request.auth != null;
+      allow read, delete: if isRobotOwner(resource.data.robot_id);
+      allow create: if isRobotOwner(request.resource.data.robot_id);
+      allow update: if isRobotOwner(resource.data.robot_id)
+        && request.resource.data.robot_id == resource.data.robot_id;
     }
     match /chat_sessions/{id} {
-      allow read, write: if request.auth != null;
+      allow read, delete: if isRobotOwner(resource.data.robot_id);
+      allow create: if isRobotOwner(request.resource.data.robot_id);
+      allow update: if isRobotOwner(resource.data.robot_id)
+        && request.resource.data.robot_id == resource.data.robot_id;
     }
     match /chat_history/{id} {
-      allow read, write: if request.auth != null;
+      allow read, delete: if isRobotOwner(resource.data.robot_id);
+      allow create: if isRobotOwner(request.resource.data.robot_id);
+      allow update: if isRobotOwner(resource.data.robot_id)
+        && request.resource.data.robot_id == resource.data.robot_id;
     }
+    // Log cảnh báo chỉ do backend ghi; client chỉ được đọc log robot của mình.
     match /logs/{id} {
-      allow read, write: if request.auth != null;
+      allow read: if isRobotOwner(resource.data.robot_id);
     }
 
     match /{document=**} {

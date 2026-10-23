@@ -27,12 +27,14 @@ import {
   query,
   where
 } from "@/lib/firebase";
+import { backendFetch } from "@/lib/backend";
+import { useRobotId } from "@/lib/robot-context";
 import UserAvatar from "@/components/UserAvatar";
 import LiveGoogleMap from "@/components/LiveGoogleMap";
 import EmergencySirenSound from "@/components/EmergencySirenSound";
 
 export default function MobileDashboard() {
-  const robotId = "an_robot_01";
+  const robotId = useRobotId();
 
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [patientRecord, setPatientRecord] = useState<MedicalRecord | null>(null);
@@ -104,8 +106,7 @@ export default function MobileDashboard() {
   const handleResetSOS = async () => {
     setStatus((prev) => ({ ...prev, fall_detected: false, sos_alert: false }));
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://robot-an-backend.onrender.com";
-      await fetch(`${backendUrl}/api/reset-sos?robot_id=${robotId}`, { method: "POST" });
+      await backendFetch(`/api/reset-sos?robot_id=${robotId}`, { method: "POST" });
     } catch (err) {}
   };
 

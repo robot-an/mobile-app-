@@ -41,6 +41,8 @@ import {
   limit,
   serverTimestamp
 } from "@/lib/firebase";
+import { backendFetch } from "@/lib/backend";
+import { useRobotId } from "@/lib/robot-context";
 import UserAvatar from "@/components/UserAvatar";
 import AppLogo from "@/components/AppLogo";
 
@@ -56,7 +58,7 @@ interface Message {
 }
 
 export default function MobileChatPage() {
-  const robotId = "an_robot_01";
+  const robotId = useRobotId();
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [mode, setMode] = useState<"companion" | "speech_learning">("companion");
   const [input, setInput] = useState("");
@@ -202,6 +204,7 @@ export default function MobileChatPage() {
     try {
       const q = query(
         collection(db, "chat_history"),
+        where("robot_id", "==", robotId),
         where("session_id", "==", currentSessionId),
         orderBy("timestamp", "asc"),
         limit(50)
@@ -233,7 +236,7 @@ export default function MobileChatPage() {
 
       return () => unsubscribe();
     } catch (err) {}
-  }, [currentSessionId, mode]);
+  }, [robotId, currentSessionId, mode]);
 
   const handleStartNewChat = () => {
     setCurrentSessionId("");
@@ -255,7 +258,11 @@ export default function MobileChatPage() {
 
     if (currentSessionId) {
       try {
-        const q = query(collection(db, "chat_history"), where("session_id", "==", currentSessionId));
+        const q = query(
+          collection(db, "chat_history"),
+          where("robot_id", "==", robotId),
+          where("session_id", "==", currentSessionId)
+        );
         const snap = await getDocs(q);
         snap.forEach(async (d) => {
           await deleteDoc(d.ref);
@@ -287,7 +294,11 @@ export default function MobileChatPage() {
 
     try {
       await deleteDoc(doc(db, "chat_sessions", sessionId));
-      const q = query(collection(db, "chat_history"), where("session_id", "==", sessionId));
+      const q = query(
+        collection(db, "chat_history"),
+        where("robot_id", "==", robotId),
+        where("session_id", "==", sessionId)
+      );
       const snap = await getDocs(q);
       snap.forEach(async (d) => {
         await deleteDoc(d.ref);
@@ -354,8 +365,7 @@ export default function MobileChatPage() {
         }, { merge: true });
       } catch (e) {}
 
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://robot-an-backend.onrender.com";
-      const res = await fetch(`${backendUrl}/api/chat`, {
+      const res = await backendFetch(`/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

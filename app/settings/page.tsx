@@ -35,10 +35,12 @@ import {
   setDoc,
   getDoc
 } from "@/lib/firebase";
+import { backendFetch } from "@/lib/backend";
+import { useRobotId } from "@/lib/robot-context";
 import UserAvatar from "@/components/UserAvatar";
 
 export default function MobileSettingsPage() {
-  const robotId = "an_robot_01";
+  const robotId = useRobotId();
 
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [mode, setMode] = useState<"companion" | "speech_learning">("companion");
@@ -188,8 +190,7 @@ export default function MobileSettingsPage() {
         }
 
         // Gửi Backend API
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://robot-an-backend.onrender.com";
-        await fetch(`${backendUrl}/api/config?robot_id=${robotId}`, {
+        await backendFetch(`/api/config?robot_id=${robotId}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -212,8 +213,7 @@ export default function MobileSettingsPage() {
     setWifiSending(true);
     setWifiFeedback(null);
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://robot-an-backend.onrender.com";
-      const res = await fetch(`${backendUrl}/api/wifi-config`, {
+      const res = await backendFetch(`/api/wifi-config`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ robot_id: robotId, ssid: wifiSsid.trim(), password: wifiPassword })
@@ -235,8 +235,7 @@ export default function MobileSettingsPage() {
     setWifiResetting(true);
     setWifiFeedback(null);
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://robot-an-backend.onrender.com";
-      const res = await fetch(`${backendUrl}/api/wifi-reset?robot_id=${robotId}`, { method: "POST" });
+      const res = await backendFetch(`/api/wifi-reset?robot_id=${robotId}`, { method: "POST" });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.detail || "Đặt lại WiFi thất bại");
       setWifiFeedback({ type: "success", text: data.message || "Đã yêu cầu robot đặt lại WiFi." });

@@ -18,6 +18,8 @@ import {
   AlertTriangle
 } from "lucide-react";
 import { db, collection, addDoc, serverTimestamp } from "@/lib/firebase";
+import { backendFetch } from "@/lib/backend";
+import { useRobotId } from "@/lib/robot-context";
 
 interface SiriVoiceModalProps {
   isOpen: boolean;
@@ -27,7 +29,7 @@ interface SiriVoiceModalProps {
 
 export default function SiriVoiceModal({ isOpen, onClose, initialQuery = "" }: SiriVoiceModalProps) {
   const router = useRouter();
-  const robotId = "an_robot_01";
+  const robotId = useRobotId();
 
   const [transcript, setTranscript] = useState("");
   const [interimText, setInterimText] = useState("");
@@ -186,8 +188,7 @@ export default function SiriVoiceModal({ isOpen, onClose, initialQuery = "" }: S
     setResponse(null);
 
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://robot-an-backend.onrender.com";
-      const res = await fetch(`${backendUrl}/api/chat`, {
+      const res = await backendFetch(`/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
