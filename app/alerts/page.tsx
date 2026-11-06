@@ -88,6 +88,12 @@ export default function MobileAlertsPage() {
     switch (rawType) {
       case "FALL_DETECTED":
         return "Phát hiện té ngã";
+      case "FALL_UNANSWERED":
+        return "Té ngã - không bấm hủy (đã nhắn SMS)";
+      case "SOS_BUTTON":
+        return "Bấm nút SOS trên robot";
+      case "VOICE_SOS":
+        return "Cầu cứu bằng giọng nói";
       case "SYSTEM_START":
         return "Robot khởi động";
       case "VOICE_EMERGENCY":
