@@ -213,6 +213,7 @@ export interface RobotStatus {
   fall_detected: boolean;
   mode: "companion" | "speech_learning";
   last_active?: string;
+  location_updated_at?: string;     // Chỉ có khi robot thật sự gửi tọa độ GPS
   sos_alert?: boolean;
   
   // Dữ liệu cảm biến phần cứng mở rộng (ESP32 + MPU6050)

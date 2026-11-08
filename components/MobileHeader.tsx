@@ -11,13 +11,15 @@ import {
   CalendarCheck2,
   Sliders,
   Bot,
+  Cpu,
   Loader2
 } from "lucide-react";
-import { auth, onAuthStateChanged, User as FirebaseUser, db, doc, onSnapshot, RobotStatus } from "@/lib/firebase";
+import { auth, onAuthStateChanged, User as FirebaseUser } from "@/lib/firebase";
 import UserAvatar from "@/components/UserAvatar";
 import AppLogo from "@/components/AppLogo";
 import { useHeaderActionContext } from "@/lib/header-action-context";
 import { useRobotId } from "@/lib/robot-context";
+import { useRobotStatus } from "@/lib/use-robot-status";
 
 export default function MobileHeader() {
   const pathname = usePathname();
@@ -26,30 +28,26 @@ export default function MobileHeader() {
   const robotId = useRobotId();
 
   const [user, setUser] = useState<FirebaseUser | null>(null);
-  const [robotStatus, setRobotStatus] = useState<RobotStatus | null>(null);
+  const { status: robotStatus, connection } = useRobotStatus(robotId);
 
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, (u) => setUser(u));
     return () => unsubAuth();
   }, []);
 
-  useEffect(() => {
-    try {
-      const unsubStatus = onSnapshot(doc(db, "status", robotId), (snap) => {
-        if (snap.exists()) {
-          setRobotStatus(snap.data() as RobotStatus);
-        }
-      });
-      return () => unsubStatus();
-    } catch (e) {}
-  }, [robotId]);
-
-  const isOnline = robotStatus?.is_online ?? true;
+  const isOnline = connection === "connected";
   const isCritical = robotStatus?.fall_detected || robotStatus?.sos_alert;
   const currentMode = robotStatus?.mode ?? "companion";
 
   const getPageInfo = () => {
     switch (pathname) {
+      case "/robot":
+        return {
+          title: "Trạng Thái Robot",
+          subtitle: "Kết nối & thông số thiết bị",
+          icon: Cpu,
+          iconColor: "text-medical-blue bg-blue-50 border-blue-100"
+        };
       case "/medical-record":
         return {
           title: "Sổ Y Bạ & Sức Khỏe",

@@ -31,6 +31,8 @@ import { backendFetch } from "@/lib/backend";
 import { useRobotId } from "@/lib/robot-context";
 import UserAvatar from "@/components/UserAvatar";
 import LiveGoogleMap from "@/components/LiveGoogleMap";
+import { useRobotStatus } from "@/lib/use-robot-status";
+import { gpsHasSignal, hasRealPosition } from "@/lib/robot-status";
 import EmergencySirenSound from "@/components/EmergencySirenSound";
 
 export default function MobileDashboard() {
@@ -46,7 +48,6 @@ export default function MobileDashboard() {
     battery: 88,
     latitude: 21.028511,
     longitude: 105.854167,
-    address: "79 Phố Đinh Tiên Hoàng, Phường Hoàn Kiếm, Hà Nội, Việt Nam",
     is_online: true,
     fall_detected: false,
     mode: "companion",
@@ -110,6 +111,7 @@ export default function MobileDashboard() {
     } catch (err) {}
   };
 
+  const { connection, now } = useRobotStatus(robotId);
   const isCritical = Boolean(status.fall_detected || status.sos_alert);
 
   const MOTION_STATE_CONFIG = {
@@ -149,8 +151,9 @@ export default function MobileDashboard() {
         <LiveGoogleMap
           latitude={status.latitude}
           longitude={status.longitude}
-          address={status.address}
-          isOnline={status.is_online}
+          hasPosition={hasRealPosition(status)}
+          hasSignal={gpsHasSignal(status, now)}
+          isOnline={connection === "connected"}
           fallDetected={isCritical}
           height="h-full min-h-[220px]"
         />

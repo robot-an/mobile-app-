@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import {
   MapPin,
+  MapPinOff,
   Navigation,
   Layers,
   Maximize2,
@@ -15,7 +16,8 @@ import {
 interface LiveGoogleMapProps {
   latitude: number;
   longitude: number;
-  address?: string;
+  hasPosition?: boolean;
+  hasSignal?: boolean;
   isOnline?: boolean;
   fallDetected?: boolean;
   height?: string;
@@ -24,10 +26,14 @@ interface LiveGoogleMapProps {
 // Bộ nhớ đệm địa chỉ để tăng tốc tải (0ms latency)
 const addressCache: Record<string, string> = {};
 
+// GPS dao động vài mét mỗi lần đo: chỉ dời ghim khi lệch khoảng 20 m, tránh bản đồ tải lại liên tục.
+const MIN_MOVE_DEG = 0.0002;
+
 export default function LiveGoogleMap({
   latitude = 21.028511,
   longitude = 105.854167,
-  address,
+  hasPosition = false,
+  hasSignal = false,
   isOnline = true,
   fallDetected = false,
   height = "h-full min-h-[200px]"
@@ -38,25 +44,19 @@ export default function LiveGoogleMap({
   const [zoom, setZoom] = useState<number>(16);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
-  const [currentAddress, setCurrentAddress] = useState<string>(
-    address || "79 Phố Đinh Tiên Hoàng, Phường Hoàn Kiếm, Hà Nội"
-  );
+  const [currentAddress, setCurrentAddress] = useState<string>("Đang tìm địa chỉ...");
 
   // Đồng bộ khi props từ bên ngoài thay đổi
   useEffect(() => {
-    setCurrentLat(latitude);
-    setCurrentLng(longitude);
+    setCurrentLat((prev) => (Math.abs(prev - latitude) >= MIN_MOVE_DEG ? latitude : prev));
+    setCurrentLng((prev) => (Math.abs(prev - longitude) >= MIN_MOVE_DEG ? longitude : prev));
   }, [latitude, longitude]);
 
   const coordKey = `${currentLat.toFixed(5)}_${currentLng.toFixed(5)}`;
 
-  // Tải địa chỉ chuẩn xác
+  // Địa chỉ luôn tính từ tọa độ thật, không dùng địa chỉ mẫu lưu trong dữ liệu
   useEffect(() => {
-    if (address && currentLat === latitude && currentLng === longitude) {
-      setCurrentAddress(address);
-      addressCache[coordKey] = address;
-      return;
-    }
+    if (!hasPosition) return;
 
     if (addressCache[coordKey]) {
       setCurrentAddress(addressCache[coordKey]);
@@ -81,7 +81,7 @@ export default function LiveGoogleMap({
     };
 
     fetchAddress();
-  }, [currentLat, currentLng, address, coordKey, latitude, longitude]);
+  }, [currentLat, currentLng, coordKey, hasPosition]);
 
   // Google Maps Universal Embed URL
   const embedUrl = useMemo(() => {
@@ -98,6 +98,18 @@ export default function LiveGoogleMap({
     setZoom((prev) => Math.max(prev - 1, 12));
   };
 
+  if (!hasPosition) {
+    return (
+      <div className={`relative w-full ${height} rounded-2xl border shadow-card bg-slate-100 flex flex-col items-center justify-center text-center p-5 select-none ${
+        fallDetected ? "border-red-500 ring-2 ring-red-300" : "border-slate-200"
+      }`}>
+        <MapPinOff className="w-8 h-8 text-slate-400" />
+        <p className="text-sm font-bold text-slate-900 mt-2">Robot chưa bắt được GPS</p>
+        <p className="text-xs text-slate-500 mt-1">Đặt robot gần cửa sổ hoặc ngoài trời vài phút để có vị trí.</p>
+      </div>
+    );
+  }
+
   return (
     <div className={`relative w-full ${height} rounded-2xl overflow-hidden border transition-all shadow-card bg-slate-100 select-none flex flex-col ${
       fallDetected ? "border-red-500 ring-2 ring-red-300" : "border-slate-200"
@@ -111,6 +123,7 @@ export default function LiveGoogleMap({
           <div className="bg-white/95 backdrop-blur-md px-2 py-1 rounded-xl border border-slate-200 shadow-xs min-w-0 flex items-center space-x-1">
             <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isOnline ? "bg-emerald-500 animate-pulse" : "bg-slate-400"}`} />
             <p className="text-[10px] font-bold text-slate-900 truncate leading-tight">
+              {!hasSignal && <span className="text-amber-700">Vị trí cuối · </span>}
               {currentAddress}
             </p>
           </div>

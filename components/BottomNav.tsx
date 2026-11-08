@@ -9,13 +9,22 @@ import {
   Bot, 
   CalendarCheck2, 
   Settings,
-  Mic
+  Cpu
 } from "lucide-react";
 import SiriVoiceModal from "@/components/SiriVoiceModal";
+import { useRobotId } from "@/lib/robot-context";
+import { useRobotStatus } from "@/lib/use-robot-status";
+
+const CONNECTION_DOT = {
+  connected: "bg-emerald-500",
+  disconnected: "bg-red-500",
+  never: "bg-slate-300"
+} as const;
 
 export default function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
+  const { connection } = useRobotStatus(useRobotId());
 
   const [showVoiceModal, setShowVoiceModal] = useState(false);
   const pressTimerRef = useRef<any>(null);
@@ -59,6 +68,12 @@ export default function BottomNav() {
       label: "Tổng quan",
       href: "/",
       icon: Home,
+    },
+    {
+      label: "Robot",
+      href: "/robot",
+      icon: Cpu,
+      showConnection: true,
     },
     {
       label: "Sổ Y Bạ",
@@ -123,14 +138,19 @@ export default function BottomNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center py-1 px-3 rounded-xl transition-colors duration-150 ${
+                className={`flex flex-col items-center py-1 px-1 rounded-xl transition-colors duration-150 ${
                   isActive
                     ? "text-medical-blue font-bold"
                     : "text-slate-400 hover:text-slate-700 font-medium"
                 }`}
               >
-                <Icon className={`w-5 h-5 ${isActive ? "stroke-[2.25]" : "stroke-[1.75]"}`} />
-                <span className="text-[10px] mt-1">{item.label}</span>
+                <span className="relative">
+                  <Icon className={`w-5 h-5 ${isActive ? "stroke-[2.25]" : "stroke-[1.75]"}`} />
+                  {item.showConnection && (
+                    <span className={`absolute -top-0.5 -right-1 w-2 h-2 rounded-full ring-2 ring-white ${CONNECTION_DOT[connection]}`} />
+                  )}
+                </span>
+                <span className="text-[10px] mt-1 whitespace-nowrap">{item.label}</span>
               </Link>
             );
           })}
