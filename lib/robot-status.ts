@@ -1,8 +1,8 @@
 import type { RobotStatus } from "@/lib/firebase";
 
-// Robot gửi dữ liệu mỗi 5 giây. Quá ngưỡng này coi như mất kết nối dù cờ is_online còn true,
-// vì cờ không kịp tắt khi máy chủ ngừng đột ngột.
-export const FRESH_WINDOW_MS = 30_000;
+// Robot gửi dữ liệu mỗi 5 giây, backend giới hạn ghi Firestore tối đa 30 giây/lần (trừ khi có sự kiện).
+// Quá ngưỡng 90 giây coi như mất kết nối dù cờ is_online còn true, vì cờ không kịp tắt khi máy chủ ngừng đột ngột.
+export const FRESH_WINDOW_MS = 90_000;
 
 export type RobotConnection = "connected" | "disconnected" | "never";
 

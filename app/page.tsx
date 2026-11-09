@@ -33,6 +33,7 @@ import UserAvatar from "@/components/UserAvatar";
 import LiveGoogleMap from "@/components/LiveGoogleMap";
 import { useRobotStatus } from "@/lib/use-robot-status";
 import { gpsHasSignal, hasRealPosition } from "@/lib/robot-status";
+import { getVietnamNow } from "@/lib/time";
 import EmergencySirenSound from "@/components/EmergencySirenSound";
 
 export default function MobileDashboard() {
@@ -41,19 +42,15 @@ export default function MobileDashboard() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [patientRecord, setPatientRecord] = useState<MedicalRecord | null>(null);
   const [schedules, setSchedules] = useState<CareSchedule[]>([]);
-  const [completedSchedules, setCompletedSchedules] = useState<string[]>(["sch_01"]);
 
   const [status, setStatus] = useState<RobotStatus>({
     robot_id: robotId,
-    battery: 88,
+    battery: 0,
     latitude: 21.028511,
     longitude: 105.854167,
-    is_online: true,
+    is_online: false,
     fall_detected: false,
     mode: "companion",
-    heart_rate: 74,
-    body_temp: 36.6,
-    fall_risk_score: 12,
     sos_alert: false,
     motion_state: "stationary"
   });
@@ -98,7 +95,7 @@ export default function MobileDashboard() {
         snapshot.forEach((doc) => {
           list.push({ id: doc.id, ...doc.data() } as CareSchedule);
         });
-        if (list.length > 0) setSchedules(list);
+        setSchedules(list);
       });
       return () => unsub();
     } catch (e) {}
@@ -113,6 +110,31 @@ export default function MobileDashboard() {
 
   const { connection, now } = useRobotStatus(robotId);
   const isCritical = Boolean(status.fall_detected || status.sos_alert);
+
+  const heartRate = status.heart_rate ?? patientRecord?.baseline_biometrics?.heart_rate_bpm;
+  const systolic = patientRecord?.baseline_biometrics?.blood_pressure_systolic;
+  const diastolic = patientRecord?.baseline_biometrics?.blood_pressure_diastolic;
+
+  // Tính cữ nhắc kế tiếp theo giờ Việt Nam từ danh sách care_schedules thực tế
+  // (hoặc fallback từ danh mục thuốc trong Sổ Y Bạ nếu chưa mở trang Lịch Nhắc để đồng bộ)
+  const { hhmm, weekday } = getVietnamNow(new Date(now));
+  const candidateSchedules: Array<{ time_of_day: string; title: string }> =
+    schedules.length > 0
+      ? schedules
+          .filter((s) => !s.days_of_week?.length || s.days_of_week.includes(weekday))
+          .map((s) => ({ time_of_day: s.time_of_day, title: s.title }))
+      : (patientRecord?.medications_list || []).flatMap((med) =>
+          (med.times || []).map((t) => ({
+            time_of_day: t,
+            title: `${med.name}${med.dosage ? ` ${med.dosage}` : ""}`
+          }))
+        );
+  const sortedCandidates = [...candidateSchedules].sort((a, b) =>
+    a.time_of_day.localeCompare(b.time_of_day)
+  );
+  const nextSchedule =
+    sortedCandidates.find((s) => s.time_of_day >= hhmm) || sortedCandidates[0] || null;
+  const passedTodayCount = sortedCandidates.filter((s) => s.time_of_day < hhmm).length;
 
   const MOTION_STATE_CONFIG = {
     stationary: { label: "Đang đứng yên", icon: PauseCircle, color: "text-slate-600", bg: "bg-slate-50", border: "border-slate-200" },
@@ -212,7 +234,13 @@ export default function MobileDashboard() {
             <div>
               <span className="text-[9px] text-slate-500 font-medium">Nhịp tim</span>
               <p className="text-sm font-extrabold text-slate-900 leading-none mt-0.5">
-                {status.heart_rate || patientRecord?.baseline_biometrics?.heart_rate_bpm || 82} <span className="text-[9px] font-normal text-slate-400">BPM</span>
+                {heartRate ? (
+                  <>
+                    {heartRate} <span className="text-[9px] font-normal text-slate-400">BPM</span>
+                  </>
+                ) : (
+                  <span className="text-xs font-semibold text-slate-400">Chưa có dữ liệu</span>
+                )}
               </p>
             </div>
             <div className="p-1.5 rounded-lg bg-red-50 text-red-500">
@@ -224,7 +252,13 @@ export default function MobileDashboard() {
             <div>
               <span className="text-[9px] text-slate-500 font-medium">Huyết áp</span>
               <p className="text-sm font-extrabold text-slate-900 leading-none mt-0.5">
-                {patientRecord?.baseline_biometrics?.blood_pressure_systolic || 120}/{patientRecord?.baseline_biometrics?.blood_pressure_diastolic || 70} <span className="text-[9px] font-normal text-slate-400">mmHg</span>
+                {systolic && diastolic ? (
+                  <>
+                    {systolic}/{diastolic} <span className="text-[9px] font-normal text-slate-400">mmHg</span>
+                  </>
+                ) : (
+                  <span className="text-xs font-semibold text-slate-400">Chưa có dữ liệu</span>
+                )}
               </p>
             </div>
             <div className="p-1.5 rounded-lg bg-blue-50 text-medical-blue">
@@ -245,10 +279,18 @@ export default function MobileDashboard() {
           </div>
           <div className="min-w-0">
             <p className="text-xs font-bold text-slate-900 truncate">
-              Cữ kế tiếp: <span className="text-medical-blue">20:00 - Atorvastatin 20mg</span>
+              {nextSchedule ? (
+                <>
+                  Cữ kế tiếp: <span className="text-medical-blue">{nextSchedule.time_of_day} - {nextSchedule.title}</span>
+                </>
+              ) : (
+                <span className="text-slate-600">Chưa có lịch nhắc thuốc</span>
+              )}
             </p>
             <p className="text-[10px] text-slate-500 font-medium truncate">
-              Hôm nay: {completedSchedules.length}/{schedules.length || 3} cữ đã hoàn thành
+              {sortedCandidates.length > 0
+                ? `Hôm nay: ${passedTodayCount}/${sortedCandidates.length} khung giờ đã qua`
+                : "Bấm để thêm lịch nhắc thuốc & sinh hiệu"}
             </p>
           </div>
         </div>
