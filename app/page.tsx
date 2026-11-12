@@ -142,7 +142,8 @@ export default function MobileDashboard() {
     shaking: { label: "Phát hiện rung lắc mạnh", icon: Vibrate, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200" },
     free_fall: { label: "Vừa phát hiện cú ngã/rơi tự do", icon: AlertTriangle, color: "text-red-600", bg: "bg-red-50", border: "border-red-200" }
   } as const;
-  const motionInfo = MOTION_STATE_CONFIG[status.motion_state || "stationary"];
+  // Giá trị lạ từ dữ liệu (robot / backend bản khác) không được làm vỡ cả trang
+  const motionInfo = MOTION_STATE_CONFIG[status.motion_state || "stationary"] ?? MOTION_STATE_CONFIG.stationary;
   const MotionIcon = motionInfo.icon;
 
   return (

@@ -136,8 +136,8 @@ export default function RobotOverviewPage() {
           <div className="grid grid-cols-2 gap-2">
             <Tile icon={BatteryMedium} label="Pin" value={status.battery != null ? `${status.battery}%` : "Chưa có"} />
             <Tile icon={MapPin} label="GPS" value={gpsText(status, now)} />
-            <Tile icon={Footprints} label="Chuyển động" value={MOTION_LABEL[status.motion_state ?? "stationary"]} />
-            <Tile icon={Sparkles} label="Chế độ" value={MODE_LABEL[status.mode ?? "companion"]} />
+            <Tile icon={Footprints} label="Chuyển động" value={MOTION_LABEL[status.motion_state ?? "stationary"] ?? "Chưa rõ"} />
+            <Tile icon={Sparkles} label="Chế độ" value={MODE_LABEL[status.mode ?? "companion"] ?? "Chưa rõ"} />
           </div>
         </>
       )}

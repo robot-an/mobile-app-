@@ -19,17 +19,29 @@ import LoadingScreen from "@/components/LoadingScreen";
 import LoginScreen from "@/components/LoginScreen";
 import SetupWizard from "@/components/SetupWizard";
 
+const RESOLVE_ATTEMPTS = 3;
+
 // Mỗi tài khoản có hồ sơ riêng (xem firestore.rules): ưu tiên robot thật đã được gán
 // owner_uid = uid, nếu chưa có thì dùng hồ sơ cá nhân medical_records/{uid}.
+//
+// Ngay sau khi đăng nhập, truy vấn đầu tiên có thể bị Firestore từ chối vì token chưa kịp gắn vào
+// kết nối. Bản cũ coi lỗi đó như "không có robot" và mở hồ sơ cá nhân, nên chủ robot thấy
+// "chưa liên kết robot" cho tới khi tải lại trang. Giờ chờ token sẵn sàng rồi thử lại vài lần.
 async function resolveRobotId(user: FirebaseUser): Promise<string> {
-  try {
-    const owned = await getDocs(
-      query(collection(db, "medical_records"), where("owner_uid", "==", user.uid))
-    );
-    const robotDoc = owned.docs.find((d) => d.id !== user.uid);
-    if (robotDoc) return robotDoc.id;
-  } catch (e) {
-    console.warn("Không tra được robot đã sở hữu, dùng hồ sơ cá nhân:", e);
+  for (let attempt = 1; attempt <= RESOLVE_ATTEMPTS; attempt++) {
+    try {
+      await user.getIdToken();
+      const owned = await getDocs(
+        query(collection(db, "medical_records"), where("owner_uid", "==", user.uid))
+      );
+      const robotDoc = owned.docs.find((d) => d.id !== user.uid);
+      return robotDoc ? robotDoc.id : user.uid;
+    } catch (e) {
+      console.warn(`Không tra được robot đã sở hữu (lần ${attempt}/${RESOLVE_ATTEMPTS}):`, e);
+      if (attempt < RESOLVE_ATTEMPTS) {
+        await new Promise((resolve) => setTimeout(resolve, 700 * attempt));
+      }
+    }
   }
   return user.uid;
 }
