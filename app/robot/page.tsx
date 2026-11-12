@@ -17,7 +17,7 @@ import {
 import { auth, RobotStatus } from "@/lib/firebase";
 import { useRobotId } from "@/lib/robot-context";
 import { useRobotStatus } from "@/lib/use-robot-status";
-import { gpsHasSignal, hasRealPosition, RobotConnection, timeAgo } from "@/lib/robot-status";
+import { gpsHasSignal, hasRealPosition, RobotConnection, timeAgo, viaLte } from "@/lib/robot-status";
 
 type HeroState = RobotConnection | "loading" | "unpaired";
 
@@ -38,12 +38,14 @@ const MOTION_LABEL = {
 
 const MODE_LABEL = { companion: "Đồng hành", speech_learning: "Học nói" } as const;
 
-function heroDetail(state: HeroState, lastActive: string | undefined, now: number): string {
+function heroDetail(state: HeroState, lastActive: string | undefined, now: number, lte: boolean): string {
   switch (state) {
     case "loading":
       return "Vui lòng chờ trong giây lát.";
     case "connected":
-      return `Robot đang trực tuyến, cập nhật ${timeAgo(lastActive, now)}.`;
+      return lte
+        ? `Robot đang ở ngoài, không có WiFi: kết nối qua 4G, báo vị trí vài phút một lần. Cập nhật ${timeAgo(lastActive, now)}.`
+        : `Robot đang trực tuyến, cập nhật ${timeAgo(lastActive, now)}.`;
     case "disconnected":
       return `Robot không còn gửi dữ liệu. Lần cuối: ${timeAgo(lastActive, now)}.`;
     case "never":
@@ -100,7 +102,7 @@ export default function RobotOverviewPage() {
         </div>
         <div className="min-w-0">
           <h2 className="text-base font-extrabold leading-tight">{hero.title}</h2>
-          <p className="text-xs font-medium mt-0.5">{heroDetail(state, status?.last_active, now)}</p>
+          <p className="text-xs font-medium mt-0.5">{heroDetail(state, status?.last_active, now, viaLte(status))}</p>
         </div>
       </section>
 
@@ -145,6 +147,7 @@ export default function RobotOverviewPage() {
       {!isUnpaired && (
         <section className="bg-white rounded-2xl p-3 border border-slate-200 shadow-card divide-y divide-slate-100">
           <InfoRow label="Mã robot" value={robotId} />
+          {status?.last_active && <InfoRow label="Đường kết nối" value={viaLte(status) ? "4G (SIM của robot)" : "WiFi"} />}
           <InfoRow label="Hoạt động gần nhất" value={timeAgo(status?.last_active, now)} />
           <InfoRow label="Vị trí GPS gần nhất" value={timeAgo(status?.location_updated_at, now)} />
         </section>
