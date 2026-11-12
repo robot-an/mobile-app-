@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { 
@@ -17,7 +17,7 @@ import {
 import AppLogo from "@/components/AppLogo";
 import { APP_DOWNLOAD_CONFIG, getIosTargetUrl } from "@/lib/downloadConfig";
 
-export default function IOSDownloadPage() {
+function IOSDownloadContent() {
   const searchParams = useSearchParams();
   const [redirecting, setRedirecting] = useState(true);
   const [countdown, setCountdown] = useState(1);
@@ -293,5 +293,13 @@ export default function IOSDownloadPage() {
         © {new Date().getFullYear()} Robot Y Tế An. Bảo vệ sức khỏe &amp; an toàn người cao tuổi và trẻ em.
       </div>
     </div>
+  );
+}
+
+export default function IOSDownloadPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen w-full bg-white" />}>
+      <IOSDownloadContent />
+    </Suspense>
   );
 }
